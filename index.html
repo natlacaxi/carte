@@ -4,64 +4,61 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>TalcoMap — le monde à portée de main</title>
 <meta name="description" content="Carte OpenStreetMap, itinéraires voiture, vélo, marche et transports, services à proximité.">
-<meta name="theme-color" content="#0b3a4a">
+<meta name="theme-color" content="#0a84ff">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-:root{--bg:#f2f7f4;--card:rgba(255,255,255,.9);--ink:#0b2a35;--mut:#5b7480;--line:#d5e3e0;--acc:#ff5a36;--sea:#0b7a75;--in:#fff}
-:root[data-theme=dark]{--bg:#0b1a22;--card:rgba(16,37,47,.92);--ink:#e6f2f0;--mut:#8fb0b8;--line:#244553;--in:#0d2029}
-@media(prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#0b1a22;--card:rgba(16,37,47,.92);--ink:#e6f2f0;--mut:#8fb0b8;--line:#244553;--in:#0d2029}}
-*{box-sizing:border-box}[hidden]{display:none!important}
-html,body{height:100%;margin:0;font:15px/1.4 "Avenir Next","Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none}
+:root{--ink:#14202b;--mut:#5f6f7c;--acc:#0a84ff;--glass:rgba(255,255,255,.58);--glass2:rgba(255,255,255,.7);--line:rgba(60,80,100,.16);--in:rgba(255,255,255,.65);--bg:#e8eef3;--card:var(--glass)}
+:root[data-theme=dark]{--ink:#f2f6fa;--mut:#9fb0bf;--glass:rgba(28,34,44,.58);--glass2:rgba(60,70,84,.62);--line:rgba(255,255,255,.14);--in:rgba(255,255,255,.09);--bg:#0b1118}
+@media(prefers-color-scheme:dark){:root[data-theme=auto]{--ink:#f2f6fa;--mut:#9fb0bf;--glass:rgba(28,34,44,.58);--glass2:rgba(60,70,84,.62);--line:rgba(255,255,255,.14);--in:rgba(255,255,255,.09);--bg:#0b1118}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}[hidden]{display:none!important}
+html,body{height:100%;margin:0;font:16px/1.4 -apple-system,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none}
 #map{position:fixed;inset:0}
 button,input,select{font:inherit;color:inherit}
-button{cursor:pointer;border:1px solid var(--line);background:var(--in);border-radius:12px;padding:8px 12px;transition:transform .15s,background .2s}
-button:active{transform:scale(.95)}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
-button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
-input,select{width:100%;border:1px solid var(--line);background:var(--in);border-radius:12px;padding:10px 12px}
-#panel{position:fixed;z-index:1000;left:0;right:0;bottom:0;max-height:62vh;display:flex;flex-direction:column;background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:22px 22px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);padding-bottom:env(safe-area-inset-bottom);transition:max-height .35s cubic-bezier(.2,.8,.2,1);animation:up .7s cubic-bezier(.2,.8,.2,1)}
-#panel.min{max-height:128px}
-@keyframes up{from{transform:translateY(100%)}}
-#grip{height:22px;display:grid;place-items:center;cursor:pointer}#grip:after{content:"";width:42px;height:5px;border-radius:9px;background:var(--line)}
-header{display:flex;align-items:center;gap:10px;padding:0 14px 6px}
-header h1{margin:0;font-size:21px;letter-spacing:-.4px;flex:1}
-.logo{width:34px;height:34px;animation:drop 1s .3s cubic-bezier(.3,1.6,.5,1) both}
-@keyframes drop{from{transform:translateY(-60px) scale(.6);opacity:0}}
-#tabs{display:flex;gap:4px;padding:0 10px;border-bottom:1px solid var(--line)}
-#tabs button{flex:1;border:0;background:none;border-radius:10px 10px 0 0;padding:9px 2px;color:var(--mut);font-weight:600;font-size:13.5px}
-#tabs button.on{color:var(--acc);box-shadow:inset 0 -3px var(--acc)}
-.body{overflow:auto;padding:12px 14px 16px;flex:1}
-section>*+*{margin-top:10px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input{flex:1;min-width:150px}
-.fld{display:flex;gap:6px}.fld button{padding:8px 10px}
-.mut{color:var(--mut);font-size:13px;margin:0}
+button{cursor:pointer;border:0;background:var(--in);border-radius:99px;padding:9px 15px;box-shadow:inset 0 0 0 1px var(--line);transition:transform .2s cubic-bezier(.3,1.5,.5,1),background .2s}
+button:active{transform:scale(.94)}:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.pri{background:var(--acc);color:#fff;font-weight:600;box-shadow:0 4px 14px rgba(10,132,255,.4)}button:disabled{opacity:.4;pointer-events:none}
+input,select{width:100%;border:0;background:var(--in);border-radius:16px;padding:12px 14px;box-shadow:inset 0 0 0 1px var(--line)}
+.glass,#panel,#ban,.mbox{background:var(--glass);backdrop-filter:blur(28px) saturate(190%);-webkit-backdrop-filter:blur(28px) saturate(190%);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px var(--line),0 18px 50px rgba(0,0,0,.25)}
+#panel{position:fixed;z-index:1000;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));height:min(58dvh,560px);display:flex;flex-direction:column;border-radius:34px;overflow:hidden;transition:height .4s cubic-bezier(.2,.9,.2,1);animation:up .8s cubic-bezier(.2,.9,.2,1)}
+#panel.min{height:132px}@keyframes up{from{transform:translateY(120%)}}
+#grip{height:24px;display:grid;place-items:center;cursor:pointer;flex:none}#grip:after{content:"";width:40px;height:5px;border-radius:9px;background:var(--mut);opacity:.5}
+header{display:flex;align-items:center;gap:10px;padding:0 16px 8px;flex:none}header h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.5px;flex:1}
+.logo{width:36px;height:36px;border-radius:9px;animation:drop .9s .3s cubic-bezier(.3,1.6,.5,1) both}@keyframes drop{from{transform:translateY(-50px) scale(.6);opacity:0}}
+#tabs{display:flex;gap:2px;margin:0 12px 6px;padding:3px;border-radius:99px;background:var(--in);box-shadow:inset 0 0 0 1px var(--line);flex:none}
+#tabs button{flex:1;background:none;box-shadow:none;padding:7px 2px;font-size:13.5px;font-weight:600;color:var(--mut)}
+#tabs button.on{background:var(--glass2);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.5)}
+.body{overflow:auto;padding:8px 16px 18px;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+section>*+*{margin-top:10px}h3{margin:6px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input{flex:1;min-width:140px}
+.fld{display:flex;gap:6px}.fld button{padding:8px 12px;flex:none}.mut{color:var(--mut);font-size:13px;margin:0}
 .ac{display:flex;flex-direction:column;gap:4px}
-.ac button,.item{text-align:left;display:block;width:100%;animation:in .25s both}
-.ac small,.item small{display:block;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@keyframes in{from{opacity:0;transform:translateX(-10px)}}
-.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips button{white-space:nowrap;border-radius:99px;padding:6px 12px}
-.chips button.on{background:var(--sea);color:#fff;border-color:var(--sea)}
-#place{background:var(--in);border:1px solid var(--line);border-radius:16px;padding:12px;animation:in .3s both}#place h3{margin:0 0 2px}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.cards button{display:flex;flex-direction:column;align-items:center;padding:8px 2px;border-radius:14px}.cards b{font-size:15px}.cards small{color:var(--mut);font-size:11.5px}.cards .on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}.cards .na{opacity:.4}
-.step{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);cursor:pointer}.step i{font-style:normal;width:26px;text-align:center}.step span{flex:1}
-.leg{display:inline-block;padding:1px 7px;border-radius:7px;background:var(--sea);color:#fff;font-size:12px;font-weight:700;margin-right:3px}
+.ac button,.item{text-align:left;display:block;width:100%;border-radius:18px;animation:in .25s both}
+.ac small,.item small{display:block;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips button{white-space:nowrap;flex:none}.chips button.on{background:var(--acc);color:#fff}
+#place{background:var(--in);border-radius:22px;padding:14px;box-shadow:inset 0 0 0 1px var(--line);animation:in .3s both}#place h3{margin:0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.cards button{display:flex;flex-direction:column;align-items:center;padding:9px 2px;border-radius:20px}.cards b{font-size:14.5px}.cards small{color:var(--mut);font-size:11.5px}.cards .on{background:var(--acc);color:#fff}.cards .on small{color:#fff}.cards .na{opacity:.4}
+.step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}.step i{font-style:normal;width:26px;text-align:center}.step span{flex:1}
+.leg{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--acc);color:#fff;font-size:12px;font-weight:700;margin-right:3px}
 .load{height:4px;border-radius:4px;background:linear-gradient(90deg,transparent,var(--acc),transparent) 0 0/200% 100%;animation:ld 1s linear infinite}@keyframes ld{to{background-position:-200% 0}}
 .pin i{display:block;width:30px;height:30px;border-radius:50% 50% 50% 0;background:var(--acc);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.4);animation:bn .6s cubic-bezier(.3,1.8,.5,1)}
-.pin i:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff}
-@keyframes bn{from{transform:translateY(-40px) rotate(-45deg);opacity:0}}
-.me i{display:block;width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 0 rgba(37,99,235,.6);animation:pl 1.8s infinite}@keyframes pl{to{box-shadow:0 0 0 22px rgba(37,99,235,0)}}
+.pin i:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff}@keyframes bn{from{transform:translateY(-40px) rotate(-45deg);opacity:0}}
+.me i{display:block;width:18px;height:18px;border-radius:50%;background:#0a84ff;border:3px solid #fff;animation:pl 1.8s infinite}@keyframes pl{0%{box-shadow:0 0 0 0 rgba(10,132,255,.6)}100%{box-shadow:0 0 0 22px rgba(10,132,255,0)}}
 .ab{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:800;border:3px solid #fff;animation:bn .5s both}
 .em{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));animation:pop .35s both}@keyframes pop{from{transform:scale(0)}}
-#tools{position:fixed;z-index:900;right:10px;top:34px;display:flex;flex-direction:column;gap:8px}
-#tools button{width:44px;height:44px;border-radius:50%;font-size:20px;padding:0;background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.25)}
-#toast{position:fixed;z-index:2000;left:50%;top:14px;transform:translate(-50%,-90px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;transition:transform .35s;max-width:90vw}#toast.on{transform:translate(-50%,0)}
-.leaflet-control-attribution{font-size:10px;max-width:60vw}.draw{filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
-label.ck{display:flex;gap:8px;align-items:center}label.ck input{width:auto}
-@media(min-width:820px){#panel{left:16px;top:16px;bottom:16px;right:auto;width:410px;max-height:none;border-radius:24px;box-shadow:0 10px 50px rgba(0,0,0,.3);animation:side .7s cubic-bezier(.2,.8,.2,1)}#panel.min{max-height:none}#grip{display:none}header{padding-top:14px}#tools{top:30px}}
+#tools{position:fixed;z-index:900;right:10px;top:calc(34px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:8px}
+#tools button{width:46px;height:46px;padding:0;font-size:20px;background:var(--glass);backdrop-filter:blur(20px) saturate(190%);-webkit-backdrop-filter:blur(20px) saturate(190%);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px var(--line),0 6px 18px rgba(0,0,0,.25)}
+#toast{position:fixed;z-index:4000;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-90px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;transition:transform .4s cubic-bezier(.3,1.4,.5,1);max-width:90vw}#toast.on{transform:translate(-50%,0)}
+.leaflet-control-attribution{font-size:10px;max-width:60vw;border-radius:10px 0 0 10px}.draw{filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+label{display:block;font-size:13px;color:var(--mut)}label select,label input{margin-top:4px;color:var(--ink)}label.ck{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15px}label.ck input{width:20px;height:20px;margin:0}
+#ban{position:fixed;z-index:1500;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top));max-width:420px;margin:auto;border-radius:26px;padding:14px 16px;display:flex;gap:12px;align-items:center;animation:drp .7s cubic-bezier(.3,1.4,.5,1)}@keyframes drp{from{transform:translateY(-150%)}}#ban p{margin:0;flex:1;font-size:14px}
+.modal{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:14px;background:rgba(0,10,25,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.mbox{width:min(560px,100%);max-height:92dvh;display:flex;flex-direction:column;border-radius:34px;overflow:hidden;animation:pp .5s cubic-bezier(.3,1.4,.5,1)}@keyframes pp{from{transform:scale(.85);opacity:0}}
+.mbox h2{margin:0;padding:20px 22px 6px}.mscroll{overflow:auto;padding:0 22px;font-size:14px;flex:1}.mscroll h3{margin:14px 0 4px}.mscroll p,.mscroll li{color:var(--ink);opacity:.88}.mfoot{padding:14px 22px 20px;display:flex;flex-direction:column;gap:10px}
+@media(min-width:820px){#panel{left:16px;top:16px;bottom:16px;right:auto;width:410px;height:auto;animation:side .8s cubic-bezier(.2,.9,.2,1)}#panel.min{height:auto}#grip{display:none}header{padding-top:16px}#tools{top:34px}#ban{left:auto;right:16px;margin:0}}
 @keyframes side{from{transform:translateX(-120%)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head>
@@ -72,7 +69,7 @@ label.ck{display:flex;gap:8px;align-items:center}label.ck input{width:auto}
 <aside id="panel">
 <div id="grip" aria-label="Agrandir ou réduire le panneau"></div>
 <header>
-<svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b7a75"/><stop offset="1" stop-color="#0b2a35"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#g)"/><path d="M32 12c-8.8 0-15 6.4-15 14.5C17 38 32 53 32 53s15-15 15-26.500C47 18.400 40.800 12 32 12z" fill="#ff5a36"/><circle cx="32" cy="26.500" r="6" fill="#fff"/></svg>
+<img class="logo" src="favicon.svg" alt="">
 <h1>TalcoMap</h1><button id="inst" hidden>Installer</button>
 </header>
 <nav id="tabs"><button data-t="explore" class="on">Explorer</button><button data-t="route">Trajet</button><button data-t="saved">Favoris</button><button data-t="set">Réglages</button></nav>
@@ -102,9 +99,25 @@ label.ck{display:flex;gap:8px;align-items:center}label.ck input{width:auto}
 <label class="ck"><input type="checkbox" data-o="hike"> Sentiers de randonnée</label>
 <label class="ck"><input type="checkbox" data-o="rail"> Réseau ferré</label>
 <div class="row"><label style="flex:1">Conso (L/100 km)<input id="s-cons" type="number" step="0.1" min="1"></label><label style="flex:1">Prix du litre (€)<input id="s-price" type="number" step="0.01" min="0"></label></div>
+<div class="row"><button id="s-inst">Installer l'application</button><button id="s-legal">Mentions légales &amp; cookies</button></div>
 <p class="mut">Cartes © contributeurs <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Itinéraires : OSRM (routing.openstreetmap.de) · Transports : <a href="https://transitous.org/sources/">Transitous</a> · Recherche : Nominatim · Services : Overpass. Contact : <a href="mailto:contact@talcomap.example">contact@talcomap.example</a> (à remplacer par ton adresse).</p>
 </section>
 </div></aside>
+<div class="modal" id="legal" hidden role="dialog" aria-modal="true" aria-labelledby="lt"><div class="mbox">
+<h2 id="lt">Avant de commencer</h2>
+<div class="mscroll">
+<h3>Mentions légales</h3>
+<p>TalcoMap est un service proposé par Talco (TalcoINC2026), avec les entités et services associés TalcoAdministration, TalcoINT et Talco-IT-Networks. Éditeur : TalcoINC2026 — adresse, numéro d'immatriculation et directeur de la publication : <i>[à compléter]</i>. Contact : <i>[adresse e-mail à compléter]</i>. Hébergeur : <i>[à compléter]</i>.</p>
+<p>Données cartographiques © contributeurs OpenStreetMap (licence ODbL). Itinéraires : OSRM. Transports : Transitous. Recherche : Nominatim. Services : Overpass. Imagerie satellite : Esri (si choisie). Fond sombre : CARTO (si choisi).</p>
+<h3>Confidentialité</h3>
+<p>TalcoMap n'a pas de compte et ne possède pas de serveur qui stocke vos données. Vos favoris, recherches récentes et réglages restent dans votre appareil. Votre position n'est utilisée que si vous touchez le bouton de localisation ; elle sert à centrer la carte ou à calculer un trajet.</p>
+<p>Pour fonctionner, l'application envoie vos recherches, les points de départ et d'arrivée et la zone affichée aux services tiers ci-dessus. Ces services voient aussi votre adresse IP et appliquent leurs propres politiques. Vous pouvez effacer vos données à tout moment avec le bouton ci-dessous ou en vidant les données du site dans votre navigateur.</p>
+<h3>Cookies et stockage local</h3>
+<p>Nous n'utilisons aucun cookie publicitaire ni de mesure d'audience. Seul un stockage local indispensable est utilisé : vos préférences, vos favoris, votre choix sur cette fenêtre, et un cache pour que la carte fonctionne hors ligne.</p>
+</div>
+<div class="mfoot"><label class="ck"><input type="checkbox" id="lck"> J'ai lu et j'accepte les mentions légales, la confidentialité et les cookies</label>
+<button class="pri" id="lok" disabled>Accepter et continuer</button><button id="lno">Refuser</button></div></div></div>
+<div id="ban" hidden><img class="logo" src="favicon.svg" alt=""><p id="bt"><b>Installer TalcoMap</b><br><span class="mut" id="bs">Accès direct depuis l'écran d'accueil, même hors ligne.</span></p><button class="pri" id="bi">Installer</button><button id="bx" aria-label="Fermer">✕</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -146,13 +159,13 @@ function showPlace(p,fromSearch){pm&&map.removeLayer(pm);cur=p;pm=L.marker([p.la
 if(fromSearch){S.hist=[p,...S.hist.filter(h=>h.name!==p.name)].slice(0,8);save();renderSaved()}
 tab('explore');const e=$('#place'),isF=S.fav.some(f=>f.lat===p.lat&&f.lon===p.lon);e.hidden=false;
 e.innerHTML=`<h3>${esc(p.name)}</h3><p class="mut">${esc(p.sub||p.lat.toFixed(5)+', '+p.lon.toFixed(5))}</p><div class="row" style="margin-top:8px"><button class="pri" id="pTo">Y aller</button><button id="pFrom">Partir d'ici</button><button id="pFav" aria-label="Favori">${isF?'★':'☆'}</button><button id="pSh">Partager</button></div>`;
-$('#pTo').onclick=()=>{setPt('b',p);if(!rt.a)locate(m=>{setPt('a',m);calc()});else calc();tab('route')};
+$('#pTo').onclick=()=>{tab('route');setPt('b',p,0);if(!rt.a)locate(m=>{setPt('a',m,0);calc()});else calc()};
 $('#pFrom').onclick=()=>{setPt('a',p);tab('route')};
 $('#pFav').onclick=()=>{S.fav=isF?S.fav.filter(f=>!(f.lat===p.lat&&f.lon===p.lon)):[{lat:p.lat,lon:p.lon,name:p.name,sub:p.sub},...S.fav];save();renderSaved();showPlace(p)};
 $('#pSh').onclick=()=>share(location.origin+location.pathname+`#p=${p.lat.toFixed(5)},${p.lon.toFixed(5)}`)}
 async function share(u){try{if(navigator.share)return await navigator.share({title:'TalcoMap',url:u});await navigator.clipboard.writeText(u);toast('Lien copié')}catch(e){}}
 ac($('#q'),$('#qr'),p=>{$('#q').value='';showPlace(p,true)});
-map.on('click',async e=>{const ll=e.latlng;if(pick){const p=await rev(ll);setPt(pick,p);pick=null;return}showPlace(await rev(ll))});
+map.on('click',async e=>{const ll=e.latlng;if(pick){const k=pick;pick=null;setPt(k,await rev(ll));$('#panel').classList.remove('min');return}if(!$('#t-route').hidden)return;showPlace(await rev(ll))});
 
 /* Position */
 let mc;function locate(cb){if(!navigator.geolocation)return toast('Géolocalisation non supportée');navigator.geolocation.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];mc&&map.removeLayer(mc);mc=L.layerGroup([L.circle(ll,{radius:p.coords.accuracy,weight:1,color:'#2563eb',fillOpacity:.1}),L.marker(ll,{icon:L.divIcon({className:'me',html:'<i></i>',iconSize:[18,18]})})]).addTo(map);if(cb)cb({lat:ll[0],lon:ll[1],name:'Ma position'});else map.flyTo(ll,16)},()=>toast('Position refusée ou indisponible'),{enableHighAccuracy:true,timeout:10000})}
@@ -174,7 +187,7 @@ $('#sl').onclick=ev=>{const k=ev.target.closest('button');k&&showPlace(L2[k.data
 /* Itinéraires */
 const M={car:['🚗','routed-car','#ff5a36','Voiture'],bike:['🚲','routed-bike','#16a34a','Vélo'],foot:['🚶','routed-foot','#2563eb','Marche'],transit:['🚆',null,'#7c3aed','Transport']};
 let res={},mode='car',rg=L.layerGroup().addTo(map);
-function setPt(k,p){rt[k]=p;$(k==='a'?'#ra':'#rb').value=p.name;if(rt.a&&rt.b&&!$('#cards').innerHTML)calc()}
+function setPt(k,p,auto=1){rt[k]=p;$(k==='a'?'#ra':'#rb').value=p.name;if(auto&&rt.a&&rt.b)calc()}
 ac($('#ra'),$('#rac'),p=>setPt('a',p));ac($('#rb'),$('#rbc'),p=>setPt('b',p));
 $('#ga').onclick=()=>locate(m=>setPt('a',m));
 $('#pa').onclick=()=>{pick='a';toast('Touchez la carte pour le départ');$('#panel').classList.add('min')};
@@ -182,11 +195,11 @@ $('#pb').onclick=()=>{pick='b';toast("Touchez la carte pour l'arrivée");$('#pan
 $('#sw').onclick=()=>{[rt.a,rt.b]=[rt.b,rt.a];$('#ra').value=rt.a?.name||'';$('#rb').value=rt.b?.name||'';rt.a&&rt.b&&calc()};
 $('#go').onclick=()=>calc();
 const dec=(s,p=6)=>{let i=0,la=0,lo=0,o=[],f=10**p;while(i<s.length){for(let k=0;k<2;k++){let b,sh=0,r=0;do{b=s.charCodeAt(i++)-63;r|=(b&31)<<sh;sh+=5}while(b>=32);const d=r&1?~(r>>1):r>>1;k?lo+=d:la+=d}o.push([la/f,lo/f])}return o};
-async function calc(){if(!rt.a||!rt.b)return toast('Choisissez un départ et une arrivée');
+let cid=0;async function calc(){if(!rt.a||!rt.b)return toast('Choisissez un départ et une arrivée');const id=++cid;
 $('#cards').innerHTML='<div class="load"></div>';$('#det').innerHTML='';res={};const c=`${rt.a.lon},${rt.a.lat};${rt.b.lon},${rt.b.lat}`;
 await Promise.all([...['car','bike','foot'].map(async m=>{try{const j=await(await fetch(`https://routing.openstreetmap.de/${M[m][1]}/route/v1/driving/${c}?overview=full&geometries=geojson&steps=true`)).json();if(j.routes?.[0])res[m]=j.routes[0]}catch(e){}}),
 (async()=>{try{const t=$('#when').value?new Date($('#when').value):new Date();const j=await(await fetch(`https://api.transitous.org/api/v5/plan?fromPlace=${rt.a.lat},${rt.a.lon}&toPlace=${rt.b.lat},${rt.b.lon}&time=${t.toISOString()}&numItineraries=4`)).json();if(j.itineraries?.length)res.transit=j.itineraries}catch(e){}})()]);
-const ks=Object.keys(res);if(!ks.length){$('#cards').innerHTML='';return toast('Aucun itinéraire trouvé (hors ligne ?)')}
+if(id!==cid)return;const ks=Object.keys(res);if(!ks.length){$('#cards').innerHTML='';return toast('Aucun itinéraire trouvé (hors ligne ?)')}
 $('#cards').className='cards';$('#cards').innerHTML=Object.keys(M).map(m=>{const r=res[m];const d=r?(m==='transit'?r[0].duration:r.duration):0,k=r?(m==='transit'?r[0].legs.reduce((a,l)=>a+(l.distance||0),0):r.distance):0;return`<button data-m="${m}" class="${r?'':'na'}"><span style="font-size:22px">${M[m][0]}</span><b>${r?fdur(d):'—'}</b><small>${r?fd(k):M[m][3]}</small></button>`}).join('');
 $('#cards').onclick=e=>{const b=e.target.closest('button');b&&res[b.dataset.m]&&show(b.dataset.m)};
 show(res[mode]?mode:ks[0])}
@@ -228,5 +241,22 @@ if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWork
 if(h.get('t'))tab(h.get('t'));
 if(h.get('p')){const[la,lo]=h.get('p').split(',').map(Number);if(la&&lo)showPlace(await rev({lat:la,lng:lo}))}
 if(h.get('r')){const v=h.get('r').split(',').map(Number);if(v.length===4&&v.every(Number.isFinite)){mode=h.get('m')in M?h.get('m'):'car';setPt('a',{lat:v[0],lon:v[1],name:'Départ'});setPt('b',{lat:v[2],lon:v[3],name:'Arrivée'});tab('route')}}})();
+
+/* Consentement + installation */
+const CV='2026-11',lg=$('#legal'),ban=$('#ban');
+const ok=()=>{try{return JSON.parse(localStorage.getItem('talcomap-consent')||'{}').v===CV}catch(e){return false}};
+const standalone=()=>matchMedia('(display-mode:standalone)').matches||navigator.standalone;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function askLegal(){lg.hidden=false;$('#lck').checked=false;$('#lok').disabled=true}
+$('#lck').onchange=e=>$('#lok').disabled=!e.target.checked;
+$('#lok').onclick=()=>{try{localStorage.setItem('talcomap-consent',JSON.stringify({v:CV,t:Date.now()}))}catch(e){}lg.hidden=true;offer()};
+$('#lno').onclick=()=>{toast('TalcoMap nécessite votre accord pour fonctionner.');$('#lck').focus()};
+$('#s-legal').onclick=askLegal;
+async function doInstall(){if(dp){dp.prompt();await dp.userChoice;dp=null;ban.hidden=true;$('#inst').hidden=true}else if(ios)toast('Touchez Partager puis « Sur l\'écran d\'accueil »');else toast("Utilisez le menu du navigateur : « Installer l'application »")}
+function offer(){if(standalone()||sessionStorage.getItem('talco-ban'))return;if(ios){$('#bs').textContent='Touchez Partager, puis « Sur l\'écran d\'accueil ».';$('#bi').hidden=true}ban.hidden=false}
+$('#bi').onclick=doInstall;$('#s-inst').onclick=doInstall;$('#inst').onclick=doInstall;
+$('#bx').onclick=()=>{ban.hidden=true;try{sessionStorage.setItem('talco-ban',1)}catch(e){}};
+addEventListener('beforeinstallprompt',()=>{if(ok()&&!standalone()&&!sessionStorage.getItem('talco-ban'))ban.hidden=false});
+ok()?setTimeout(offer,1200):askLegal();
 </script>
 </body></html>
