@@ -1,139 +1,232 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Gratuite - Recherche BAN</title>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; padding: 20px; background: #f5f5f7; }
-    
-    .search-container {
-      position: relative;
-      margin-bottom: 12px;
-      max-width: 500px;
-    }
-    input {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      outline: none;
-    }
-    .results {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .result-item {
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 14px;
-      border-bottom: 1px solid #eee;
-    }
-    .result-item:hover { background: #f0f0f5; }
-
-    #map {
-      height: 550px;
-      width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-  </style>
-</head>
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TalcoMap — le monde à portée de main</title>
+<meta name="description" content="Carte OpenStreetMap, itinéraires voiture, vélo, marche et transports, services à proximité.">
+<meta name="theme-color" content="#0b3a4a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#f2f7f4;--card:rgba(255,255,255,.9);--ink:#0b2a35;--mut:#5b7480;--line:#d5e3e0;--acc:#ff5a36;--sea:#0b7a75;--in:#fff}
+:root[data-theme=dark]{--bg:#0b1a22;--card:rgba(16,37,47,.92);--ink:#e6f2f0;--mut:#8fb0b8;--line:#244553;--in:#0d2029}
+@media(prefers-color-scheme:dark){:root[data-theme=auto]{--bg:#0b1a22;--card:rgba(16,37,47,.92);--ink:#e6f2f0;--mut:#8fb0b8;--line:#244553;--in:#0d2029}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{height:100%;margin:0;font:15px/1.4 "Avenir Next","Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior:none}
+#map{position:fixed;inset:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--in);border-radius:12px;padding:8px 12px;transition:transform .15s,background .2s}
+button:active{transform:scale(.95)}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+input,select{width:100%;border:1px solid var(--line);background:var(--in);border-radius:12px;padding:10px 12px}
+#panel{position:fixed;z-index:1000;left:0;right:0;bottom:0;max-height:62vh;display:flex;flex-direction:column;background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:22px 22px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);padding-bottom:env(safe-area-inset-bottom);transition:max-height .35s cubic-bezier(.2,.8,.2,1);animation:up .7s cubic-bezier(.2,.8,.2,1)}
+#panel.min{max-height:128px}
+@keyframes up{from{transform:translateY(100%)}}
+#grip{height:22px;display:grid;place-items:center;cursor:pointer}#grip:after{content:"";width:42px;height:5px;border-radius:9px;background:var(--line)}
+header{display:flex;align-items:center;gap:10px;padding:0 14px 6px}
+header h1{margin:0;font-size:21px;letter-spacing:-.4px;flex:1}
+.logo{width:34px;height:34px;animation:drop 1s .3s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes drop{from{transform:translateY(-60px) scale(.6);opacity:0}}
+#tabs{display:flex;gap:4px;padding:0 10px;border-bottom:1px solid var(--line)}
+#tabs button{flex:1;border:0;background:none;border-radius:10px 10px 0 0;padding:9px 2px;color:var(--mut);font-weight:600;font-size:13.5px}
+#tabs button.on{color:var(--acc);box-shadow:inset 0 -3px var(--acc)}
+.body{overflow:auto;padding:12px 14px 16px;flex:1}
+section>*+*{margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input{flex:1;min-width:150px}
+.fld{display:flex;gap:6px}.fld button{padding:8px 10px}
+.mut{color:var(--mut);font-size:13px;margin:0}
+.ac{display:flex;flex-direction:column;gap:4px}
+.ac button,.item{text-align:left;display:block;width:100%;animation:in .25s both}
+.ac small,.item small{display:block;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes in{from{opacity:0;transform:translateX(-10px)}}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips button{white-space:nowrap;border-radius:99px;padding:6px 12px}
+.chips button.on{background:var(--sea);color:#fff;border-color:var(--sea)}
+#place{background:var(--in);border:1px solid var(--line);border-radius:16px;padding:12px;animation:in .3s both}#place h3{margin:0 0 2px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cards button{display:flex;flex-direction:column;align-items:center;padding:8px 2px;border-radius:14px}.cards b{font-size:15px}.cards small{color:var(--mut);font-size:11.5px}.cards .on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}.cards .na{opacity:.4}
+.step{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);cursor:pointer}.step i{font-style:normal;width:26px;text-align:center}.step span{flex:1}
+.leg{display:inline-block;padding:1px 7px;border-radius:7px;background:var(--sea);color:#fff;font-size:12px;font-weight:700;margin-right:3px}
+.load{height:4px;border-radius:4px;background:linear-gradient(90deg,transparent,var(--acc),transparent) 0 0/200% 100%;animation:ld 1s linear infinite}@keyframes ld{to{background-position:-200% 0}}
+.pin i{display:block;width:30px;height:30px;border-radius:50% 50% 50% 0;background:var(--acc);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.4);animation:bn .6s cubic-bezier(.3,1.8,.5,1)}
+.pin i:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#fff}
+@keyframes bn{from{transform:translateY(-40px) rotate(-45deg);opacity:0}}
+.me i{display:block;width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 0 rgba(37,99,235,.6);animation:pl 1.8s infinite}@keyframes pl{to{box-shadow:0 0 0 22px rgba(37,99,235,0)}}
+.ab{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:800;border:3px solid #fff;animation:bn .5s both}
+.em{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));animation:pop .35s both}@keyframes pop{from{transform:scale(0)}}
+#tools{position:fixed;z-index:900;right:10px;top:34px;display:flex;flex-direction:column;gap:8px}
+#tools button{width:44px;height:44px;border-radius:50%;font-size:20px;padding:0;background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#toast{position:fixed;z-index:2000;left:50%;top:14px;transform:translate(-50%,-90px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;transition:transform .35s;max-width:90vw}#toast.on{transform:translate(-50%,0)}
+.leaflet-control-attribution{font-size:10px;max-width:60vw}.draw{filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+label.ck{display:flex;gap:8px;align-items:center}label.ck input{width:auto}
+@media(min-width:820px){#panel{left:16px;top:16px;bottom:16px;right:auto;width:410px;max-height:none;border-radius:24px;box-shadow:0 10px 50px rgba(0,0,0,.3);animation:side .7s cubic-bezier(.2,.8,.2,1)}#panel.min{max-height:none}#grip{display:none}header{padding-top:14px}#tools{top:30px}}
+@keyframes side{from{transform:translateX(-120%)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
 <body>
+<div id="map"></div>
+<div id="tools"><button id="zi" aria-label="Zoom avant">＋</button><button id="zo" aria-label="Zoom arrière">－</button><button id="loc" aria-label="Ma position">◎</button></div>
+<div id="toast" role="status"></div>
+<aside id="panel">
+<div id="grip" aria-label="Agrandir ou réduire le panneau"></div>
+<header>
+<svg class="logo" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b7a75"/><stop offset="1" stop-color="#0b2a35"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#g)"/><path d="M32 12c-8.8 0-15 6.4-15 14.5C17 38 32 53 32 53s15-15 15-26.500C47 18.400 40.800 12 32 12z" fill="#ff5a36"/><circle cx="32" cy="26.500" r="6" fill="#fff"/></svg>
+<h1>TalcoMap</h1><button id="inst" hidden>Installer</button>
+</header>
+<nav id="tabs"><button data-t="explore" class="on">Explorer</button><button data-t="route">Trajet</button><button data-t="saved">Favoris</button><button data-t="set">Réglages</button></nav>
+<div class="body">
+<section id="t-explore">
+<input id="q" type="search" placeholder="Rechercher un lieu, une adresse, une ville…" autocomplete="off">
+<div id="qr" class="ac"></div>
+<div id="place" hidden></div>
+<p class="mut">Services autour de vous (zoomez sur la carte)</p>
+<div class="chips" id="chips"></div>
+<div id="sl"></div>
+</section>
+<section id="t-route" hidden>
+<div class="fld"><input id="ra" placeholder="Départ" autocomplete="off"><button id="ga" aria-label="Ma position">◎</button><button id="pa" aria-label="Choisir sur la carte">📌</button></div><div id="rac" class="ac"></div>
+<div class="fld"><input id="rb" placeholder="Arrivée" autocomplete="off"><button id="pb" aria-label="Choisir sur la carte">📌</button></div><div id="rbc" class="ac"></div>
+<div class="row"><button id="sw">⇅ Inverser</button><input type="datetime-local" id="when" title="Heure de départ (transports)" style="flex:1"><button id="go" class="pri">Calculer</button></div>
+<div id="cards"></div><div id="det"></div>
+</section>
+<section id="t-saved" hidden><div id="fav"></div><div id="hist"></div></section>
+<section id="t-set" hidden>
+<label>Thème<select id="s-theme"><option value="auto">Automatique</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
+<label>Fond de carte<select id="s-base"><option value="osm">OpenStreetMap</option><option value="hot">Humanitaire</option><option value="cyclo">CyclOSM (vélo)</option><option value="topo">Relief (OpenTopoMap)</option><option value="sat">Satellite</option><option value="dark">Sombre</option></select></label>
+<label>Unités<select id="s-unit"><option value="km">Kilomètres</option><option value="mi">Miles</option></select></label>
+<p class="mut">Couches superposées</p>
+<label class="ck"><input type="checkbox" data-o="opnv"> Lignes de transport</label>
+<label class="ck"><input type="checkbox" data-o="cyc"> Itinéraires vélo</label>
+<label class="ck"><input type="checkbox" data-o="hike"> Sentiers de randonnée</label>
+<label class="ck"><input type="checkbox" data-o="rail"> Réseau ferré</label>
+<div class="row"><label style="flex:1">Conso (L/100 km)<input id="s-cons" type="number" step="0.1" min="1"></label><label style="flex:1">Prix du litre (€)<input id="s-price" type="number" step="0.01" min="0"></label></div>
+<p class="mut">Cartes © contributeurs <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Itinéraires : OSRM (routing.openstreetmap.de) · Transports : <a href="https://transitous.org/sources/">Transitous</a> · Recherche : Nominatim · Services : Overpass. Contact : <a href="mailto:contact@talcomap.example">contact@talcomap.example</a> (à remplacer par ton adresse).</p>
+</section>
+</div></aside>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={fav:[],hist:[],theme:'auto',unit:'km',base:'osm',ov:[],cons:6.5,price:1.85};
+try{Object.assign(S,JSON.parse(localStorage.getItem('talcomap')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('talcomap',JSON.stringify(S))}catch(e){}};
+const NOM='https://nominatim.openstreetmap.org';
+const fd=m=>S.unit==='mi'?(m/1609.34).toFixed(1)+' mi':m<1000?Math.round(m)+' m':(m/1000).toFixed(m<10000?1:0)+' km';
+const fdur=s=>{const m=Math.max(1,Math.round(s/60));return m<60?m+' min':Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')};
+const hm=i=>new Date(i).toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit'});
+let tt;const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),3200)};
+const theme=()=>document.documentElement.dataset.theme=S.theme;theme();
 
-  <div class="search-container">
-    <input type="text" id="search-input" placeholder="Taper une adresse en France..." autocomplete="off">
-    <div id="results" class="results" style="display: none;"></div>
-  </div>
+/* Carte */
+const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([46.6,2.4],6);
+L.control.attribution({position:'topright',prefix:false}).addTo(map);
+L.control.scale({imperial:true,position:'bottomright'}).addTo(map);
+const B={osm:['https://tile.openstreetmap.org/{z}/{x}/{y}.png','© OpenStreetMap',19],hot:['https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png','© OpenStreetMap, HOT',19],cyclo:['https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png','© OpenStreetMap, CyclOSM',20],topo:['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png','© OpenStreetMap, SRTM, OpenTopoMap',17],sat:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}','Imagerie © Esri',19],dark:['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png','© OpenStreetMap, © CARTO',20]};
+const O={opnv:['https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png','ÖPNVKarte'],cyc:['https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png','Waymarked Trails'],hike:['https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png','Waymarked Trails'],rail:['https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png','OpenRailwayMap']};
+let bl,ol={};
+function setBase(k){if(!B[k])k='osm';bl&&map.removeLayer(bl);bl=L.tileLayer(B[k][0],{attribution:B[k][1],maxZoom:B[k][2],subdomains:'abc'}).addTo(map);bl.bringToBack()}
+function setOv(){for(const k in O){const on=S.ov.includes(k);if(on&&!ol[k])ol[k]=L.tileLayer(O[k][0],{attribution:O[k][1],maxZoom:19,opacity:.85}).addTo(map);if(!on&&ol[k]){map.removeLayer(ol[k]);delete ol[k]}}}
+setBase(S.base);setOv();
+$('#zi').onclick=()=>map.zoomIn();$('#zo').onclick=()=>map.zoomOut();
 
-  <div id="map"></div>
+/* Panneau */
+function tab(t){$$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('section').forEach(s=>s.hidden=s.id!=='t-'+t);$('#panel').classList.remove('min')}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');b&&tab(b.dataset.t)};
+$('#grip').onclick=()=>$('#panel').classList.toggle('min');
+const pad=()=>innerWidth>=820?{paddingTopLeft:[440,30],paddingBottomRight:[30,30]}:{paddingTopLeft:[20,60],paddingBottomRight:[20,innerHeight*.5]};
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+/* Recherche */
+function ac(inp,box,pick){let t;inp.addEventListener('input',()=>{clearTimeout(t);const q=inp.value.trim();if(q.length<3){box.innerHTML='';return}t=setTimeout(async()=>{try{const r=await(await fetch(NOM+'/search?format=jsonv2&limit=6&accept-language=fr&q='+encodeURIComponent(q))).json();box.innerHTML=r.map((p,i)=>`<button data-i="${i}"><b>${esc(p.name||p.display_name.split(',')[0])}</b><small>${esc(p.display_name)}</small></button>`).join('')||'<p class="mut">Aucun résultat</p>';box.onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=r[b.dataset.i];box.innerHTML='';pick({lat:+p.lat,lon:+p.lon,name:p.name||p.display_name.split(',')[0],sub:p.display_name})}}catch(e){box.innerHTML='<p class="mut">Recherche indisponible (hors ligne ?)</p>'}},350)})}
+async function rev(ll){try{const j=await(await fetch(`${NOM}/reverse?format=jsonv2&accept-language=fr&lat=${ll.lat}&lon=${ll.lng}`)).json();const a=j.address||{};return{lat:ll.lat,lon:ll.lng,name:j.name||a.road||a.village||a.town||a.city||'Lieu choisi',sub:j.display_name}}catch(e){return{lat:ll.lat,lon:ll.lng,name:'Lieu choisi'}}}
+const pin=()=>L.divIcon({className:'pin',html:'<i></i>',iconSize:[30,40],iconAnchor:[15,40]});
+let pm,cur,rt={a:null,b:null},pick=null;
+function showPlace(p,fromSearch){pm&&map.removeLayer(pm);cur=p;pm=L.marker([p.lat,p.lon],{icon:pin()}).addTo(map);map.flyTo([p.lat,p.lon],Math.max(map.getZoom(),15));
+if(fromSearch){S.hist=[p,...S.hist.filter(h=>h.name!==p.name)].slice(0,8);save();renderSaved()}
+tab('explore');const e=$('#place'),isF=S.fav.some(f=>f.lat===p.lat&&f.lon===p.lon);e.hidden=false;
+e.innerHTML=`<h3>${esc(p.name)}</h3><p class="mut">${esc(p.sub||p.lat.toFixed(5)+', '+p.lon.toFixed(5))}</p><div class="row" style="margin-top:8px"><button class="pri" id="pTo">Y aller</button><button id="pFrom">Partir d'ici</button><button id="pFav" aria-label="Favori">${isF?'★':'☆'}</button><button id="pSh">Partager</button></div>`;
+$('#pTo').onclick=()=>{setPt('b',p);if(!rt.a)locate(m=>{setPt('a',m);calc()});else calc();tab('route')};
+$('#pFrom').onclick=()=>{setPt('a',p);tab('route')};
+$('#pFav').onclick=()=>{S.fav=isF?S.fav.filter(f=>!(f.lat===p.lat&&f.lon===p.lon)):[{lat:p.lat,lon:p.lon,name:p.name,sub:p.sub},...S.fav];save();renderSaved();showPlace(p)};
+$('#pSh').onclick=()=>share(location.origin+location.pathname+`#p=${p.lat.toFixed(5)},${p.lon.toFixed(5)}`)}
+async function share(u){try{if(navigator.share)return await navigator.share({title:'TalcoMap',url:u});await navigator.clipboard.writeText(u);toast('Lien copié')}catch(e){}}
+ac($('#q'),$('#qr'),p=>{$('#q').value='';showPlace(p,true)});
+map.on('click',async e=>{const ll=e.latlng;if(pick){const p=await rev(ll);setPt(pick,p);pick=null;return}showPlace(await rev(ll))});
 
-  <script>
-    // 1. Initialisation carte (Nice)
-    const map = L.map('map').setView([43.7031, 7.2661], 13);
+/* Position */
+let mc;function locate(cb){if(!navigator.geolocation)return toast('Géolocalisation non supportée');navigator.geolocation.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];mc&&map.removeLayer(mc);mc=L.layerGroup([L.circle(ll,{radius:p.coords.accuracy,weight:1,color:'#2563eb',fillOpacity:.1}),L.marker(ll,{icon:L.divIcon({className:'me',html:'<i></i>',iconSize:[18,18]})})]).addTo(map);if(cb)cb({lat:ll[0],lon:ll[1],name:'Ma position'});else map.flyTo(ll,16)},()=>toast('Position refusée ou indisponible'),{enableHighAccuracy:true,timeout:10000})}
+$('#loc').onclick=()=>locate();
 
-    // 2. Tuiles CartoDB Voyager (Grands serveurs gratuits, sans blocage file://)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      subdomains: 'abcd',
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>'
-    }).addTo(map);
+/* Services (Overpass) */
+const SV=[['🍽️','Restaurants','amenity=restaurant'],['☕','Cafés','amenity=cafe'],['🥖','Boulangeries','shop=bakery'],['🛒','Supermarchés','shop=supermarket'],['💊','Pharmacies','amenity=pharmacy'],['🏥','Hôpitaux','amenity=hospital'],['⛽','Carburant','amenity=fuel'],['🔌','Recharge VE','amenity=charging_station'],['🅿️','Parkings','amenity=parking'],['🏧','Distributeurs','amenity=atm'],['🏨','Hôtels','tourism=hotel'],['🚻','Toilettes','amenity=toilets'],['🚉','Gares','railway=station'],['🚲','Vélos partagés','amenity=bicycle_rental'],['🌳','Parcs','leisure=park'],['🏛️','Musées','tourism=museum']];
+$('#chips').innerHTML=SV.map((s,i)=>`<button data-i="${i}">${s[0]} ${s[1]}</button>`).join('');
+const sg=L.layerGroup().addTo(map);
+$('#chips').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const s=SV[b.dataset.i];$$('#chips button').forEach(x=>x.classList.toggle('on',x===b));sg.clearLayers();
+if(map.getZoom()<13){$('#sl').innerHTML='<p class="mut">Zoomez sur la carte (niveau 13 ou plus) pour chercher ici.</p>';return}
+const bb=map.getBounds(),c=map.getCenter();$('#sl').innerHTML='<div class="load"></div>';
+try{const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(`[out:json][timeout:25];nwr[${s[2]}](${bb.getSouth()},${bb.getWest()},${bb.getNorth()},${bb.getEast()});out center 80;`)});
+const L2=(await r.json()).elements.map(x=>({lat:x.lat??x.center?.lat,lon:x.lon??x.center?.lon,name:x.tags?.name||s[1].replace(/s$/,''),sub:[x.tags?.['addr:street'],x.tags?.opening_hours].filter(Boolean).join(' · ')})).filter(x=>x.lat).map(x=>({...x,d:c.distanceTo([x.lat,x.lon])})).sort((a,b)=>a.d-b.d);
+L2.forEach(x=>L.marker([x.lat,x.lon],{icon:L.divIcon({className:'',html:`<div class="em">${s[0]}</div>`,iconSize:[26,26]})}).on('click',()=>showPlace(x)).addTo(sg));
+$('#sl').innerHTML=L2.length?L2.slice(0,30).map((x,i)=>`<button class="item" data-i="${i}"><b>${s[0]} ${esc(x.name)}</b><small>${fd(x.d)}${x.sub?' · '+esc(x.sub):''}</small></button>`).join(''):'<p class="mut">Rien trouvé dans cette zone.</p>';
+$('#sl').onclick=ev=>{const k=ev.target.closest('button');k&&showPlace(L2[k.dataset.i])}}catch(err){$('#sl').innerHTML='<p class="mut">Service indisponible, réessayez.</p>'}};
 
-    let currentMarker = null;
+/* Itinéraires */
+const M={car:['🚗','routed-car','#ff5a36','Voiture'],bike:['🚲','routed-bike','#16a34a','Vélo'],foot:['🚶','routed-foot','#2563eb','Marche'],transit:['🚆',null,'#7c3aed','Transport']};
+let res={},mode='car',rg=L.layerGroup().addTo(map);
+function setPt(k,p){rt[k]=p;$(k==='a'?'#ra':'#rb').value=p.name;if(rt.a&&rt.b&&!$('#cards').innerHTML)calc()}
+ac($('#ra'),$('#rac'),p=>setPt('a',p));ac($('#rb'),$('#rbc'),p=>setPt('b',p));
+$('#ga').onclick=()=>locate(m=>setPt('a',m));
+$('#pa').onclick=()=>{pick='a';toast('Touchez la carte pour le départ');$('#panel').classList.add('min')};
+$('#pb').onclick=()=>{pick='b';toast("Touchez la carte pour l'arrivée");$('#panel').classList.add('min')};
+$('#sw').onclick=()=>{[rt.a,rt.b]=[rt.b,rt.a];$('#ra').value=rt.a?.name||'';$('#rb').value=rt.b?.name||'';rt.a&&rt.b&&calc()};
+$('#go').onclick=()=>calc();
+const dec=(s,p=6)=>{let i=0,la=0,lo=0,o=[],f=10**p;while(i<s.length){for(let k=0;k<2;k++){let b,sh=0,r=0;do{b=s.charCodeAt(i++)-63;r|=(b&31)<<sh;sh+=5}while(b>=32);const d=r&1?~(r>>1):r>>1;k?lo+=d:la+=d}o.push([la/f,lo/f])}return o};
+async function calc(){if(!rt.a||!rt.b)return toast('Choisissez un départ et une arrivée');
+$('#cards').innerHTML='<div class="load"></div>';$('#det').innerHTML='';res={};const c=`${rt.a.lon},${rt.a.lat};${rt.b.lon},${rt.b.lat}`;
+await Promise.all([...['car','bike','foot'].map(async m=>{try{const j=await(await fetch(`https://routing.openstreetmap.de/${M[m][1]}/route/v1/driving/${c}?overview=full&geometries=geojson&steps=true`)).json();if(j.routes?.[0])res[m]=j.routes[0]}catch(e){}}),
+(async()=>{try{const t=$('#when').value?new Date($('#when').value):new Date();const j=await(await fetch(`https://api.transitous.org/api/v5/plan?fromPlace=${rt.a.lat},${rt.a.lon}&toPlace=${rt.b.lat},${rt.b.lon}&time=${t.toISOString()}&numItineraries=4`)).json();if(j.itineraries?.length)res.transit=j.itineraries}catch(e){}})()]);
+const ks=Object.keys(res);if(!ks.length){$('#cards').innerHTML='';return toast('Aucun itinéraire trouvé (hors ligne ?)')}
+$('#cards').className='cards';$('#cards').innerHTML=Object.keys(M).map(m=>{const r=res[m];const d=r?(m==='transit'?r[0].duration:r.duration):0,k=r?(m==='transit'?r[0].legs.reduce((a,l)=>a+(l.distance||0),0):r.distance):0;return`<button data-m="${m}" class="${r?'':'na'}"><span style="font-size:22px">${M[m][0]}</span><b>${r?fdur(d):'—'}</b><small>${r?fd(k):M[m][3]}</small></button>`}).join('');
+$('#cards').onclick=e=>{const b=e.target.closest('button');b&&res[b.dataset.m]&&show(b.dataset.m)};
+show(res[mode]?mode:ks[0])}
+function line(ll,col,dash){L.polyline(ll,{color:'#fff',weight:10,opacity:.85,interactive:false}).addTo(rg);const l=L.polyline(ll,{color:col,weight:6,dashArray:dash,lineCap:'round',className:'draw',interactive:false}).addTo(rg),el=l.getElement();
+if(el&&!dash&&!matchMedia('(prefers-reduced-motion:reduce)').matches){const n=el.getTotalLength();el.style.strokeDasharray=n;el.style.strokeDashoffset=n;el.getBoundingClientRect();el.style.transition='stroke-dashoffset 1.3s ease';el.style.strokeDashoffset=0;setTimeout(()=>el.style.strokeDasharray='',1400)}return l}
+const ab=(p,t)=>L.marker([p.lat,p.lon],{icon:L.divIcon({className:'',html:`<div class="ab">${t}</div>`,iconSize:[28,28]})}).addTo(rg);
+const ARW={left:'↰',right:'↱','slight left':'↖','slight right':'↗','sharp left':'⬅','sharp right':'➡',straight:'⬆',uturn:'↶'},MOD={left:'à gauche',right:'à droite','slight left':'légèrement à gauche','slight right':'légèrement à droite','sharp left':'franchement à gauche','sharp right':'franchement à droite',straight:'tout droit',uturn:'demi-tour'};
+function stepTxt(s){const m=s.maneuver,n=s.name?` sur ${esc(s.name)}`:'';if(m.type==='depart')return'Démarrer'+n;if(m.type==='arrive')return'Vous êtes arrivé';if(/roundabout|rotary/.test(m.type))return`Au rond-point, sortie ${m.exit||''}${n}`;if(m.modifier==='straight'||m.type==='continue')return'Continuer'+n;return`Tourner ${MOD[m.modifier]||''}${n}`}
+const TE={WALK:'🚶',BIKE:'🚲',BUS:'🚌',COACH:'🚌',TRAM:'🚊',SUBWAY:'🚇',METRO:'🚇',FERRY:'⛴️'};const te=m=>TE[m]||(/RAIL|TRAIN/.test(m)?'🚆':'🚍');
+function show(m){mode=m;$$('#cards button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));rg.clearLayers();ab(rt.a,'A');ab(rt.b,'B');const D=$('#det');
+if(m==='transit'){D.innerHTML=res.transit.map((it,i)=>`<button class="item" data-i="${i}" style="margin-bottom:6px"><b>${hm(it.startTime)} → ${hm(it.endTime)}</b> · ${fdur(it.duration)} · ${it.transfers} corresp.<br>${it.legs.map(l=>l.mode==='WALK'?'🚶':`<span class="leg" style="${l.routeColor?'background:#'+esc(l.routeColor):''}">${te(l.mode)} ${esc(l.routeShortName||'')}</span>`).join('')}</button>`).join('');D.onclick=e=>{const b=e.target.closest('button');b&&drawT(res.transit[b.dataset.i])};drawT(res.transit[0]);return}
+const r=res[m],km=r.distance/1000;line(r.geometry.coordinates.map(c=>[c[1],c[0]]),M[m][2]);map.fitBounds(L.latLngBounds(r.geometry.coordinates.map(c=>[c[1],c[0]])),pad());
+const est=m==='car'?`⛽ ≈ ${(km*S.cons/100*S.price).toFixed(2)} € · CO₂ ≈ ${(km*.12).toFixed(1)} kg`:m==='bike'?`🔥 ≈ ${Math.round(km*30)} kcal · 0 CO₂`:`🔥 ≈ ${Math.round(km*55)} kcal · 0 CO₂`;
+const arr=new Date(Date.now()+r.duration*1000);
+D.innerHTML=`<p><b>${fdur(r.duration)}</b> · ${fd(r.distance)} · arrivée ${hm(arr)}</p><p class="mut">${est} (estimations)</p><div class="row"><button id="shR">Partager l'itinéraire</button></div>`+r.legs[0].steps.map((s,i)=>`<div class="step" data-i="${i}"><i>${s.maneuver.type==='arrive'?'🏁':ARW[s.maneuver.modifier]||'⬆'}</i><span>${stepTxt(s)}</span><small class="mut">${fd(s.distance)}</small></div>`).join('');
+D.onclick=e=>{const s=e.target.closest('.step');if(s){const c=r.legs[0].steps[s.dataset.i].maneuver.location;map.flyTo([c[1],c[0]],17);if(innerWidth<820)$('#panel').classList.add('min')}};
+$('#shR').onclick=()=>share(location.origin+location.pathname+`#r=${rt.a.lat.toFixed(5)},${rt.a.lon.toFixed(5)},${rt.b.lat.toFixed(5)},${rt.b.lon.toFixed(5)}&m=${m}`)}
+function drawT(it){rg.clearLayers();ab(rt.a,'A');ab(rt.b,'B');let all=[];it.legs.forEach(l=>{const ll=l.legGeometry?dec(l.legGeometry.points,l.legGeometry.precision??6):[];all=all.concat(ll);ll.length&&line(ll,l.mode==='WALK'?'#2563eb':(l.routeColor?'#'+l.routeColor:M.transit[2]),l.mode==='WALK'?'1 10':null)});all.length&&map.fitBounds(L.latLngBounds(all),pad());
+let h=$('#legs');h||($('#det').insertAdjacentHTML('beforeend','<div id="legs"></div>'),h=$('#legs'));h.innerHTML='<hr>'+it.legs.map(l=>`<div class="step"><i>${te(l.mode)}</i><span>${l.mode==='WALK'?'Marcher':esc((l.routeShortName||'')+' '+(l.headsign?'→ '+l.headsign:''))}<small class="mut" style="display:block">${hm(l.startTime)} ${esc(l.from.name||'')} → ${hm(l.endTime)} ${esc(l.to.name||'')}</small></span><small class="mut">${fdur(l.duration)}</small></div>`).join('')}
 
-    const input = document.getElementById('search-input');
-    const resultsDiv = document.getElementById('results');
+/* Favoris / réglages */
+function renderSaved(){const row=(p,i,t)=>`<div class="fld"><button class="item" data-t="${t}" data-i="${i}" style="flex:1"><b>${esc(p.name)}</b><small>${esc(p.sub||'')}</small></button><button data-d="${t}${i}" aria-label="Supprimer">✕</button></div>`;
+$('#fav').innerHTML='<h3>★ Favoris</h3>'+(S.fav.map((p,i)=>row(p,i,'f')).join('')||'<p class="mut">Touchez ☆ sur un lieu pour l\'enregistrer ici.</p>');
+$('#hist').innerHTML='<h3>Récents</h3>'+(S.hist.map((p,i)=>row(p,i,'h')).join('')||'<p class="mut">Vos recherches apparaîtront ici.</p>')}
+$('#t-saved').onclick=e=>{const d=e.target.closest('[data-d]');if(d){const t=d.dataset.d[0],i=+d.dataset.d.slice(1);(t==='f'?S.fav:S.hist).splice(i,1);save();return renderSaved()}const b=e.target.closest('.item');b&&showPlace((b.dataset.t==='f'?S.fav:S.hist)[b.dataset.i])};
+$('#s-theme').value=S.theme;$('#s-base').value=S.base;$('#s-unit').value=S.unit;$('#s-cons').value=S.cons;$('#s-price').value=S.price;$$('[data-o]').forEach(c=>c.checked=S.ov.includes(c.dataset.o));
+$('#s-theme').onchange=e=>{S.theme=e.target.value;theme();save()};$('#s-base').onchange=e=>{S.base=e.target.value;setBase(S.base);save()};$('#s-unit').onchange=e=>{S.unit=e.target.value;save()};
+$('#s-cons').onchange=e=>{S.cons=+e.target.value||6.5;save()};$('#s-price').onchange=e=>{S.price=+e.target.value||1.85;save()};
+$$('[data-o]').forEach(c=>c.onchange=()=>{S.ov=$$('[data-o]').filter(x=>x.checked).map(x=>x.dataset.o);setOv();save()});
+renderSaved();
 
-    // 3. Autocomplétion via l'API officielle Adresse (BAN)
-    input.addEventListener('input', async (e) => {
-      const query = e.target.value.trim();
-      if (query.length < 3) {
-        resultsDiv.style.display = 'none';
-        return;
-      }
+/* PWA */
+let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('#inst').hidden=false});
+$('#inst').onclick=async()=>{if(dp){dp.prompt();await dp.userChoice;dp=null;$('#inst').hidden=true}};
+if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 
-      try {
-        const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=5`);
-        const data = await response.json();
-
-        resultsDiv.innerHTML = '';
-        if (data.features.length === 0) {
-          resultsDiv.style.display = 'none';
-          return;
-        }
-
-        data.features.forEach(feature => {
-          const item = document.createElement('div');
-          item.className = 'result-item';
-          item.textContent = feature.properties.label;
-          
-          item.onclick = () => {
-            const [lng, lat] = feature.geometry.coordinates;
-            
-            map.setView([lat, lng], 16);
-
-            if (currentMarker) map.removeLayer(currentMarker);
-            currentMarker = L.marker([lat, lng]).addTo(map)
-              .bindPopup(`<b>${feature.properties.label}</b>`)
-              .openPopup();
-
-            input.value = feature.properties.label;
-            resultsDiv.style.display = 'none';
-          };
-
-          resultsDiv.appendChild(item);
-        });
-
-        resultsDiv.style.display = 'block';
-      } catch (err) {
-        console.error('Erreur API BAN :', err);
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!input.contains(e.target) && !resultsDiv.contains(e.target)) {
-        resultsDiv.style.display = 'none';
-      }
-    });
-  </script>
-
-</body>
-</html>
+/* Liens partagés */
+(async()=>{const h=new URLSearchParams(location.hash.slice(1));
+if(h.get('t'))tab(h.get('t'));
+if(h.get('p')){const[la,lo]=h.get('p').split(',').map(Number);if(la&&lo)showPlace(await rev({lat:la,lng:lo}))}
+if(h.get('r')){const v=h.get('r').split(',').map(Number);if(v.length===4&&v.every(Number.isFinite)){mode=h.get('m')in M?h.get('m'):'car';setPt('a',{lat:v[0],lon:v[1],name:'Départ'});setPt('b',{lat:v[2],lon:v[3],name:'Arrivée'});tab('route')}}})();
+</script>
+</body></html>
