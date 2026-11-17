@@ -85,12 +85,15 @@ body.nav #top,body.nav #tabs,body.nav #panel,body.nav #tools,body.nav #ban,body.
 #map.rot .em,#map.rot .ab{transform:rotate(var(--hd,0deg))}#map.rot .pin i{transform:rotate(calc(-45deg + var(--hd,0deg)))}
 .car{transition:transform .4s linear}body.nav #toast{bottom:calc(160px + env(safe-area-inset-bottom))}
 @media(min-width:820px){#ntop{left:16px;right:auto;margin:0;width:460px}}
+#sbS{display:none}#acb.on{background:var(--acc);color:var(--onacc);font-weight:700;font-size:16px}
+.rpg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.rpg button{display:flex;flex-direction:column;align-items:center;font-size:28px;border-radius:16px;padding:10px;color:var(--ink)}.rpg small,#nrep small{font-size:12px}
+.leaflet-popup-content button{padding:4px 10px;font-size:13px;margin:4px 4px 0 0}.mscroll label{margin-top:10px}.mscroll .row{margin-top:10px}
 </style></head>
 <body>
 <div id="map"></div>
-<div id="tools"><button id="zi" aria-label="Zoom avant">＋</button><button id="zo" aria-label="Zoom arrière">－</button><button id="loc" aria-label="Ma position">◎</button><button id="bc" aria-label="Changer de fond de carte">🗺</button><button id="ms" aria-label="Mesurer une distance">📏</button><button id="fs" aria-label="Plein écran">⛶</button></div>
+<div id="tools"><button id="zi" aria-label="Zoom avant">＋</button><button id="zo" aria-label="Zoom arrière">－</button><button id="loc" aria-label="Ma position">◎</button><button id="bc" aria-label="Changer de fond de carte">🗺</button><button id="ms" aria-label="Mesurer une distance">📏</button><button id="fs" aria-label="Plein écran">⛶</button><button id="rpb" aria-label="Signaler">🚨</button></div>
 <div id="toast" role="status"></div>
-<div id="top"><div id="sb"><img class="logo" src="favicon.svg" alt=""><input id="q" type="search" placeholder="Rechercher sur TalcoMap" autocomplete="off" enterkeyhint="search"><button id="mic" aria-label="Recherche vocale" hidden>🎤</button><button id="sbS" aria-label="Réglages">⚙️</button></div><div id="qr" class="ac"></div><div class="chips" id="chips"></div></div>
+<div id="top"><div id="sb"><img class="logo" src="favicon.svg" alt=""><input id="q" type="search" placeholder="Rechercher sur TalcoMap" autocomplete="off" enterkeyhint="search"><button id="mic" aria-label="Recherche vocale" hidden>🎤</button><button id="acb" aria-label="Compte" title="Compte">👤</button><button id="sbS" aria-label="Réglages">⚙️</button></div><div id="qr" class="ac"></div><div class="chips" id="chips"></div></div>
 <nav id="tabs"><button data-t="explore" class="on"><i>🧭</i>Explorer</button><button data-t="route"><i>🚗</i>Trajet</button><button data-t="saved"><i>⭐</i>Enregistrés</button><button data-t="set"><i>⚙️</i>Réglages</button></nav>
 <aside id="panel" class="mid">
 <div id="grip" aria-label="Déplacer le panneau"></div>
@@ -108,7 +111,7 @@ body.nav #top,body.nav #tabs,body.nav #panel,body.nav #tools,body.nav #ban,body.
 <div class="row"><button id="sw">⇅ Inverser</button><input type="datetime-local" id="when" title="Heure de départ (transports)" style="flex:1"><button id="go" class="pri">Calculer</button></div>
 <div id="cards"></div><div id="det"></div>
 </section>
-<section id="t-saved" hidden><div id="fav"></div><div id="hist"></div></section>
+<section id="t-saved" hidden><div id="fav"></div><div id="trips"></div><div id="hist"></div></section>
 <section id="t-set" hidden>
 <label>Thème<select id="s-theme"><option value="auto">Automatique</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
 <label>Fond de carte<select id="s-base"><option value="osm">OpenStreetMap</option><option value="hot">Humanitaire</option><option value="cyclo">CyclOSM (vélo)</option><option value="topo">Relief (OpenTopoMap)</option><option value="sat">Satellite</option><option value="dark">Sombre</option></select></label>
@@ -120,24 +123,43 @@ body.nav #top,body.nav #tabs,body.nav #panel,body.nav #tools,body.nav #ban,body.
 <label class="ck"><input type="checkbox" data-o="rail"> Réseau ferré</label>
 <label class="ck"><input type="checkbox" id="s-follow"> Suivre ma position en continu</label>
 <div class="row"><label style="flex:1">Conso (L/100 km)<input id="s-cons" type="number" step="0.1" min="1"></label><label style="flex:1">Prix du litre (€)<input id="s-price" type="number" step="0.01" min="0"></label></div>
-<div class="row"><button id="s-inst">Installer l'application</button><button id="s-legal">Mentions légales &amp; cookies</button><button id="s-clear">Effacer mes données</button></div>
+<div class="row"><button id="s-acc">👤 Compte</button><button id="s-inst">Installer l'application</button><button id="s-legal">Mentions légales &amp; cookies</button><button id="s-clear">Effacer mes données</button></div>
 <p class="mut">Cartes © contributeurs <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Itinéraires : OSRM (routing.openstreetmap.de) · Transports : <a href="https://transitous.org/sources/">Transitous</a> · Recherche : Nominatim · Services : Overpass. Contact : <a href="mailto:contact@talcomap.example">contact@talcomap.example</a> (à remplacer par ton adresse).</p>
 </section>
 </div></aside>
 <div class="modal" id="legal" hidden role="dialog" aria-modal="true" aria-labelledby="lt"><div class="mbox">
 <h2 id="lt">Avant de commencer</h2>
 <div class="mscroll">
-<h3>Mentions légales</h3>
-<p>TalcoMap est un service proposé par Talco (TalcoINC2026), avec les entités et services associés TalcoAdministration, TalcoINT et Talco-IT-Networks. Éditeur : TalcoINC2026 — adresse, numéro d'immatriculation et directeur de la publication : <i>[à compléter]</i>. Contact : <i>[adresse e-mail à compléter]</i>. Hébergeur : <i>[à compléter]</i>.</p>
-<p>Données cartographiques © contributeurs OpenStreetMap (licence ODbL). Itinéraires : OSRM. Transports : Transitous. Recherche : Nominatim. Services : Overpass. Imagerie satellite : Esri (si choisie). Fond sombre : CARTO (si choisi). Météo et altitude : Open-Meteo. Vols récents : OpenSky Network.</p>
-<h3>Confidentialité</h3>
-<p>TalcoMap n'a pas de compte et ne possède pas de serveur qui stocke vos données. Vos favoris, recherches récentes et réglages restent dans votre appareil. Votre position n'est utilisée que si vous touchez le bouton de localisation ; elle sert à centrer la carte ou à calculer un trajet.</p>
-<p>Pour fonctionner, l'application envoie vos recherches, les points de départ et d'arrivée et la zone affichée aux services tiers ci-dessus. Ces services voient aussi votre adresse IP et appliquent leurs propres politiques. Vous pouvez effacer vos données à tout moment avec le bouton ci-dessous ou en vidant les données du site dans votre navigateur.</p>
-<h3>Cookies et stockage local</h3>
-<p>Nous n'utilisons aucun cookie publicitaire ni de mesure d'audience. Seul un stockage local indispensable est utilisé : vos préférences, vos favoris, votre choix sur cette fenêtre, et un cache pour que la carte fonctionne hors ligne.</p>
+<p class="mut">Dernière mise à jour : 17 novembre 2026. Ces règles s'appliquent à TalcoMap et aux services associés TalcoAdministration, TalcoINT, Talco-IT-Networks et TalcoINC2026.</p>
+<h3>1. Éditeur et mentions légales</h3>
+<p>Éditeur : TalcoINC2026 (avec TalcoAdministration, TalcoINT et Talco-IT-Networks). Adresse, forme juridique, numéro d'immatriculation, directeur de la publication : <i>[à compléter]</i>. Contact : <i>[adresse e-mail à compléter]</i>. Hébergeur : <i>[à compléter]</i>. Les comptes administrateurs sont ceux d'Anton et de Talco.</p>
+<h3>2. Objet du service</h3>
+<p>TalcoMap affiche une carte, calcule des itinéraires (voiture, vélo, marche, transports), propose un guidage, des services à proximité, et un compte facultatif pour enregistrer vos lieux et trajets et partager des signalements. L'accès à la carte est libre, sans compte.</p>
+<h3>3. Compte</h3>
+<p>Le compte se crée avec un pseudo (3 à 20 caractères) et un mot de passe. Il est réservé aux personnes de 15 ans ou plus. Vous êtes responsable de la confidentialité de votre mot de passe. Aucune adresse e-mail réelle n'est demandée : en cas d'oubli, le mot de passe ne peut pas être récupéré par e-mail.</p>
+<h3>4. Signalements (contrôleurs, police, accidents…)</h3>
+<p>Les signalements sont visibles par tous les visiteurs, avec votre pseudo, la position, le type et l'heure. Ils expirent automatiquement à l'affichage (de 1 h à 24 h selon le type). Vous vous engagez à ne signaler que des faits réels et actuels, sans propos injurieux, sans donnée personnelle sur des tiers et sans détournement. Les signalements sont indicatifs et peuvent être inexacts. Dans certains pays, dont la France, la diffusion d'informations sur les contrôles routiers est encadrée par la loi : l'éditeur peut désactiver à tout moment les alertes police, contrôleurs et radars, ou se conformer à toute demande des autorités. Vous êtes responsable des signalements que vous publiez.</p>
+<h3>5. Modération et suspension</h3>
+<p>Les administrateurs peuvent supprimer tout signalement et suspendre un compte, avec suppression de ses données et signalements, notamment en cas d'abus, de faux signalements, de harcèlement ou de contenu illicite. Un compte suspendu ne peut plus se connecter ni publier.</p>
+<h3>6. Sécurité routière et responsabilité</h3>
+<p>Le guidage et les temps de trajet sont des estimations. Respectez le code de la route et la signalisation réelle, ne manipulez pas le téléphone en conduisant. Les données cartographiques peuvent comporter des erreurs. Le service est fourni sans garantie de disponibilité, et l'éditeur n'est pas responsable des dommages résultant de son usage, dans les limites permises par la loi.</p>
+<h3>7. Données personnelles</h3>
+<p>Responsable du traitement : TalcoINC2026 (coordonnées ci-dessus). Données traitées : pseudo, identifiant technique, mot de passe (stocké chiffré par Firebase Authentication, jamais lisible par l'éditeur), favoris, domicile, travail, trajets enregistrés, signalements (type, position, heure, pseudo), votes de confirmation, état de suspension, journaux techniques. Votre position GPS n'est utilisée que sur action de votre part (bouton de localisation, guidage, signalement) et n'est conservée que si vous publiez un signalement ou enregistrez un lieu.</p>
+<p>Finalités et bases légales : fournir le compte et la synchronisation (exécution du service) ; afficher les signalements et modérer (intérêt légitime de sécurité et de qualité) ; mesure d'audience (consentement, facultatif). Destinataires : Google Firebase (authentification, base de données, éventuellement Analytics), avec des transferts possibles hors Union européenne encadrés par les garanties de Google ; les services cartographiques listés au point 9 reçoivent vos requêtes techniques. Aucune vente de données.</p>
+<p>Durées : compte et données synchronisées jusqu'à suppression du compte ; signalements supprimés au plus tard à la prochaine connexion de leur auteur ou d'un administrateur après 24 h ; cache et préférences jusqu'à effacement des données du site. Vos droits : accès, rectification, effacement, portabilité, opposition, limitation, et retrait du consentement à tout moment. Dans l'application : Compte → Exporter mes données, Supprimer mon compte, et Réglages pour les cookies. Réclamation possible auprès de la CNIL (cnil.fr).</p>
+<h3>8. Cookies et stockage local</h3>
+<p><b>Indispensables</b> (sans consentement) : « talcomap » (préférences, favoris, récents, domicile, travail, trajets, stockage local, jusqu'à effacement) ; « talcomap-consent » (votre choix, jusqu'à nouvelle version de ces règles) ; session Firebase Authentication (IndexedDB « firebaseLocalStorageDb », tant que vous êtes connecté) ; cache hors ligne de l'application et des tuiles de carte (service worker).</p>
+<p><b>Facultatifs</b> (uniquement si vous cochez la case ci-dessous) : mesure d'audience Google Analytics, cookies « _ga » et « _ga_G-PJBNGP9VG1 », durée maximale de 13 mois. Sans votre accord, aucun cookie de mesure n'est déposé. Vous pouvez changer d'avis dans Réglages → Mentions légales &amp; cookies, et effacer les cookies depuis votre navigateur. Aucun cookie publicitaire n'est utilisé.</p>
+<h3>9. Services tiers</h3>
+<p>Fonds de carte © contributeurs OpenStreetMap (licence ODbL), CyclOSM, OpenTopoMap, CARTO, Esri ; itinéraires OSRM (routing.openstreetmap.de) ; transports Transitous ; recherche Nominatim ; services Overpass ; météo et altitude Open-Meteo ; vols récents OpenSky ; Wikipédia ; Google Firebase. Ces services voient votre adresse IP et appliquent leurs propres politiques.</p>
+<h3>10. Propriété intellectuelle</h3>
+<p>Le code et le design de TalcoMap appartiennent à l'éditeur. Les données cartographiques restent soumises à leurs licences respectives. Vous conservez vos droits sur vos contenus et accordez à l'éditeur le droit de les afficher dans le service.</p>
+<h3>11. Modification et droit applicable</h3>
+<p>Ces règles peuvent évoluer ; en cas de changement important, votre acceptation sera redemandée. Elles sont soumises au droit français ; tout litige relève des tribunaux compétents, sous réserve des droits des consommateurs.</p>
 </div>
-<div class="mfoot"><label class="ck"><input type="checkbox" id="lck"> J'ai lu et j'accepte les mentions légales, la confidentialité et les cookies</label>
-<button class="pri" id="lok" disabled>Accepter et continuer</button><button id="lno">Refuser</button></div></div></div>
+<div class="mfoot"><label class="ck"><input type="checkbox" id="lck"> J'ai lu et j'accepte les mentions légales, les conditions d'utilisation, la politique de confidentialité et la politique de cookies</label><label class="ck"><input type="checkbox" id="lan"> J'autorise la mesure d'audience (Google Analytics), facultatif</label><button class="pri" id="lok" disabled>Continuer</button><button id="lno">Refuser</button></div></div></div>
+<div class="modal" id="accm" hidden role="dialog" aria-modal="true" aria-labelledby="act"><div class="mbox"><h2 id="act">Compte</h2><div class="mscroll" id="acbody"></div><div class="mfoot"><button id="acx">Fermer</button></div></div></div>
+<div class="modal" id="rpm" hidden role="dialog" aria-modal="true"><div class="mbox"><h2>Signaler</h2><div class="mscroll"><p class="mut">Position : GPS si disponible, sinon centre de la carte. Ne signalez que des faits réels et actuels.</p><div id="rpg" class="rpg"></div></div><div class="mfoot"><button id="rpx">Annuler</button></div></div></div>
 <div id="navui" hidden>
 <div id="ntop"><div id="nta">⬆</div><div id="ntt"><div id="nti">…</div><div id="ntn"></div></div></div>
 <div id="nspd"><b id="nsv">0</b><small>km/h</small></div><div id="nlim" hidden><b id="nlv"></b></div>
@@ -151,7 +173,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let S={fav:[],hist:[],theme:'auto',unit:'km',base:'osm',ov:[],cons:6.5,price:1.85};
 try{Object.assign(S,JSON.parse(localStorage.getItem('talcomap')||'{}'))}catch(e){}
-const save=()=>{try{localStorage.setItem('talcomap',JSON.stringify(S))}catch(e){}};
+const save=()=>{try{localStorage.setItem('talcomap',JSON.stringify(S))}catch(e){}if(typeof cloudPush==='function')cloudPush()};
 const NOM='https://nominatim.openstreetmap.org';
 const fd=m=>S.unit==='mi'?(m/1609.34).toFixed(1)+' mi':m<1000?Math.round(m)+' m':(m/1000).toFixed(m<10000?1:0)+' km';
 const fdur=s=>{const m=Math.max(1,Math.round(s/60));return m<60?m+' min':Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')};
@@ -263,7 +285,7 @@ let h=$('#legs');h||($('#det').insertAdjacentHTML('beforeend','<div id="legs"></
 function renderSaved(){const row=(p,i,t)=>`<div class="fld"><button class="item" data-t="${t}" data-i="${i}" style="flex:1"><b>${esc(p.name)}</b><small>${esc(p.sub||'')}</small></button><button data-d="${t}${i}" aria-label="Supprimer">✕</button></div>`;
 $('#fav').innerHTML='<h3>★ Favoris</h3>'+(S.fav.map((p,i)=>row(p,i,'f')).join('')||'<p class="mut">Touchez ☆ sur un lieu pour l\'enregistrer ici.</p>');
 $('#hist').innerHTML='<h3>Récents</h3>'+(S.hist.map((p,i)=>row(p,i,'h')).join('')||'<p class="mut">Vos recherches apparaîtront ici.</p>')}
-$('#t-saved').onclick=e=>{const d=e.target.closest('[data-d]');if(d){const t=d.dataset.d[0],i=+d.dataset.d.slice(1);(t==='f'?S.fav:S.hist).splice(i,1);save();return renderSaved()}const b=e.target.closest('.item');b&&showPlace((b.dataset.t==='f'?S.fav:S.hist)[b.dataset.i])};
+$('#t-saved').onclick=e=>{const d=e.target.closest('[data-d]');if(d){const t=d.dataset.d[0],i=+d.dataset.d.slice(1);(t==='f'?S.fav:S.hist).splice(i,1);save();return renderSaved()}const b=e.target.closest('.item[data-t]');b&&showPlace((b.dataset.t==='f'?S.fav:S.hist)[b.dataset.i])};
 $('#s-theme').value=S.theme;$('#s-base').value=S.base;$('#s-unit').value=S.unit;$('#s-cons').value=S.cons;$('#s-price').value=S.price;$$('[data-o]').forEach(c=>c.checked=S.ov.includes(c.dataset.o));
 $('#s-theme').onchange=e=>{S.theme=e.target.value;theme();setBase(S.base);save()};matchMedia('(prefers-color-scheme:dark)').addEventListener?.('change',()=>setBase(S.base));$('#s-base').onchange=e=>{S.base=e.target.value;setBase(S.base);save()};$('#s-unit').onchange=e=>{S.unit=e.target.value;save()};
 $('#s-cons').onchange=e=>{S.cons=+e.target.value||6.5;save()};$('#s-price').onchange=e=>{S.price=+e.target.value||1.85;save()};
@@ -282,13 +304,13 @@ if(h.get('p')){const[la,lo]=h.get('p').split(',').map(Number);if(la&&lo)showPlac
 if(h.get('r')){const v=h.get('r').split(',').map(Number);if(v.length===4&&v.every(Number.isFinite)){mode=h.get('m')in M?h.get('m'):'car';setPt('a',{lat:v[0],lon:v[1],name:'Départ'});setPt('b',{lat:v[2],lon:v[3],name:'Arrivée'});tab('route')}}})();
 
 /* Consentement + installation */
-const CV='2026-11b',lg=$('#legal'),ban=$('#ban');
+const CV='2026-11c',lg=$('#legal'),ban=$('#ban');
 const ok=()=>{try{return JSON.parse(localStorage.getItem('talcomap-consent')||'{}').v===CV}catch(e){return false}};
 const standalone=()=>matchMedia('(display-mode:standalone)').matches||navigator.standalone;
 const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-function askLegal(){lg.hidden=false;$('#lck').checked=false;$('#lok').disabled=true}
+function askLegal(){lg.hidden=false;$('#lck').checked=false;$('#lok').disabled=true;try{$('#lan').checked=!!JSON.parse(localStorage.getItem('talcomap-consent')||'{}').an}catch(e){}}
 $('#lck').onchange=e=>$('#lok').disabled=!e.target.checked;
-$('#lok').onclick=()=>{try{localStorage.setItem('talcomap-consent',JSON.stringify({v:CV,t:Date.now()}))}catch(e){}lg.hidden=true;offer()};
+$('#lok').onclick=()=>{try{localStorage.setItem('talcomap-consent',JSON.stringify({v:CV,t:Date.now(),an:$('#lan').checked}))}catch(e){}lg.hidden=true;offer();fbStart().then(anOn)};
 $('#lno').onclick=()=>{toast('TalcoMap nécessite votre accord pour fonctionner.');$('#lck').focus()};
 $('#s-legal').onclick=askLegal;
 async function doInstall(){if(dp){dp.prompt();await dp.userChoice;dp=null;ban.hidden=true;$('#inst').hidden=true}else if(ios)toast('Touchez Partager puis « Sur l\'écran d\'accueil »');else toast("Utilisez le menu du navigateur : « Installer l'application »")}
@@ -296,7 +318,7 @@ function offer(){if(standalone()||sessionStorage.getItem('talco-ban'))return;if(
 $('#bi').onclick=doInstall;$('#s-inst').onclick=doInstall;$('#inst').onclick=doInstall;
 $('#bx').onclick=()=>{ban.hidden=true;try{sessionStorage.setItem('talco-ban',1)}catch(e){}};
 addEventListener('beforeinstallprompt',()=>{if(ok()&&!standalone()&&!sessionStorage.getItem('talco-ban'))ban.hidden=false});
-ok()?setTimeout(offer,1200):askLegal();
+ok()?(setTimeout(offer,1200),fbStart()):askLegal();
 
 /* Détails de trajet et outils */
 const tile=(b,t)=>`<div><b>${b}</b><small>${t}</small></div>`;
@@ -310,9 +332,9 @@ const gl=m=>{const a=rt.a,b=rt.b,g={car:'driving',bike:'bicycling',foot:'walking
 function stats(m,r,arr){const km=r.distance/1000,v=km/(r.duration/3600),t=[tile(fdur(r.duration),'Durée'),tile(fd(r.distance),'Distance'),tile(hm(arr),'Arrivée'),tile(S.unit==='mi'?Math.round(v*.621)+' mph':Math.round(v)+' km/h','Vitesse moy.'),tile(r.legs[0].steps.length,'Étapes')];
 if(m==='car')t.push(tile((km*S.cons/100*S.price).toFixed(2)+' €','Carburant'),tile((km*.12).toFixed(1)+' kg','CO₂'));else t.push(tile('≈ '+Math.round(km*(m==='bike'?30:55))+' kcal','Calories'),m==='foot'?tile(Math.round(km*1312).toLocaleString('fr'),'Pas'):tile('0 kg','CO₂'));
 const roads=[...new Set(r.legs[0].steps.map(s=>s.name).filter(Boolean))].slice(0,5);
-return`<div class="stats">${t.join('')}</div>${roads.length?`<p class="mut">Via ${esc(roads.join(', '))}</p>`:''}<p class="mut" id="wxd"></p><div id="elev"></div>${gl(m)}<div class="row" style="margin-top:8px"><button class="pri" id="nav">▶ Guidage</button><button id="navS">Simuler</button><button id="gpx">GPX</button><button id="vox">🔊 Consignes</button><button id="shR">Partager</button><button id="cpy">Copier</button></div>`}
+return`<div class="stats">${t.join('')}</div>${roads.length?`<p class="mut">Via ${esc(roads.join(', '))}</p>`:''}<p class="mut" id="wxd"></p><div id="elev"></div>${gl(m)}<div class="row" style="margin-top:8px"><button class="pri" id="nav">▶ Guidage</button><button id="navS">Simuler</button><button id="gpx">GPX</button><button id="vox">🔊 Consignes</button><button id="shR">Partager</button><button id="svT">💾 Enregistrer</button><button id="cpy">Copier</button></div>`}
 function tsum(it){const w=it.legs.filter(l=>l.mode==='WALK'),wt=w.reduce((a,l)=>a+l.duration,0),wd=w.reduce((a,l)=>a+(l.distance||0),0),st=it.legs.reduce((a,l)=>a+(l.intermediateStops?.length||0),0);setTimeout(wxd);return`<div class="stats">${tile(fdur(it.duration),'Durée')}${tile(it.transfers,'Correspondances')}${tile(fdur(wt),'À pied')}${tile(fd(wd),'Marche')}${tile(hm(it.startTime),'Départ')}${tile(hm(it.endTime),'Arrivée')}${st?tile(st,'Arrêts'):''}</div><p class="mut" id="wxd"></p>${gl('transit')}`}
-function extras(m,r){wxd();$('#nav').onclick=()=>navStart(m,r);$('#navS').onclick=()=>navStart(m,r,1);
+function extras(m,r){wxd();$('#nav').onclick=()=>navStart(m,r);$('#svT').onclick=()=>saveTrip(m,r);$('#navS').onclick=()=>navStart(m,r,1);
 $('#gpx').onclick=()=>{const pts=r.geometry.coordinates.map(c=>`<trkpt lat="${c[1]}" lon="${c[0]}"/>`).join('');const u=document.createElement('a');u.href=URL.createObjectURL(new Blob([`<?xml version="1.0"?><gpx version="1.1" creator="TalcoMap" xmlns="http://www.topografix.com/GPX/1/1"><trk><name>${esc(rt.a.name)} - ${esc(rt.b.name)}</name><trkseg>${pts}</trkseg></trk></gpx>`],{type:'application/gpx+xml'}));u.download='talcomap.gpx';u.click();setTimeout(()=>URL.revokeObjectURL(u.href),5e3)};
 $('#vox').onclick=()=>{if(!window.speechSynthesis)return toast('Voix non supportée');if(speechSynthesis.speaking)return speechSynthesis.cancel();r.legs[0].steps.forEach(s=>{const d=document.createElement('div');d.innerHTML=stepTxt(s);const u=new SpeechSynthesisUtterance(d.textContent+', puis continuer '+fd(s.distance));u.lang='fr-FR';speechSynthesis.speak(u)})};
 $('#cpy').onclick=()=>{navigator.clipboard?.writeText(`${rt.a.name} → ${rt.b.name} : ${M[m][3]}, ${fdur(r.duration)}, ${fd(r.distance)}`);toast('Résumé copié')};
@@ -363,7 +385,7 @@ const bearing=(a,b)=>{const t=Math.PI/180,y=Math.sin((b.lng-a.lng)*t)*Math.cos(b
 function mapRot(on){const m=$('#map');m.classList.toggle('rot',on);if(!on){m.style.transform='';m.style.setProperty('--hd','0deg')}map.invalidateSize();map.dragging[on?'disable':'enable']()}
 const carIcon=()=>L.divIcon({className:'',html:'<div class="car"><svg viewBox="0 0 40 40" width="46" height="46"><circle cx="20" cy="20" r="18" fill="rgba(26,115,232,.22)"/><path d="M20 5l11 28-11-6-11 6z" fill="#1a73e8" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/></svg></div>',iconSize:[46,46],iconAnchor:[23,23]});
 function drawNav(){const rest=nco.slice(nidx);nl1&&nl1.setLatLngs(rest);nl2&&nl2.setLatLngs(rest)}
-function navStart(m,r,sim){if(!sim&&!navigator.geolocation)return toast('Géolocalisation non supportée');navStop(1);nr=r;nmode=m;nc=0;nidx=0;spk={};nfirst=1;nfree=0;nlim=0;nlast=null;nll=null;rot=0;$('#nlim').hidden=true;$('#nfr').textContent='🔓';
+function navStart(m,r,sim){if(!sim&&!navigator.geolocation)return toast('Géolocalisation non supportée');navStop(1);nr=r;nmode=m;nc=0;nidx=0;spk={};warned={};nfirst=1;nfree=0;nlim=0;nlast=null;nll=null;rot=0;$('#nlim').hidden=true;$('#nfr').textContent='🔓';
 nco=r.geometry.coordinates.map(c=>[c[1],c[0]]);document.body.classList.add('nav');$('#navui').hidden=false;$('#nti').textContent='Recherche du GPS…';$('#nta').textContent='⬆';$('#ntn').textContent='';
 rg.clearLayers();ab(rt.a,'A');ab(rt.b,'B');nl1=L.polyline(nco,{color:'#fff',weight:15,opacity:.95,interactive:false}).addTo(rg);nl2=L.polyline(nco,{color:'#1a73e8',weight:9,lineCap:'round',interactive:false}).addTo(rg);
 mc&&map.removeLayer(mc);mc=null;mapRot(true);
@@ -386,7 +408,7 @@ if(!cm)cm=L.marker(ll,{icon:carIcon(),zIndexOffset:1000,interactive:false}).addT
 const lim=nmode==='car'?70:45;let bi=nidx,bd=1e9;for(let i=Math.max(0,nidx-5);i<Math.min(nco.length,nidx+300);i++){const d=ll.distanceTo(nco[i]);if(d<bd){bd=d;bi=i}}
 if(bd>lim){bd=1e9;for(let i=0;i<nco.length;i++){const d=ll.distanceTo(nco[i]);if(d<bd){bd=d;bi=i}}}
 if(bd>lim&&Date.now()-lastRe>15000){lastRe=Date.now();reroute(ll);return}
-nidx=bi;drawNav();
+nidx=bi;drawNav();warnRep(ll);
 if(!nfree){const z=nmode==='car'?(v>20?16:17):18,r=nhd*Math.PI/180,d=innerHeight*.2;map.setView(map.unproject(map.project(ll,z).add([d*Math.sin(r),-d*Math.cos(r)]),z),z,{animate:!nfirst,duration:.8,easeLinearity:1});nfirst=0;
 const dl=((nhd-rot)%360+540)%360-180;rot+=dl;const m=$('#map');m.style.transform=`rotate(${-rot}deg)`;m.style.setProperty('--hd',rot+'deg')}
 while(nc+1<st.length-1&&ll.distanceTo(loc(nc+1))<25)nc++;
@@ -402,11 +424,21 @@ $('#nvx').onclick=()=>{navStop();toast('Guidage arrêté')};
 $('#nvv').onclick=()=>{mute=!mute;$('#nvv').textContent=mute?'🔇':'🔊'};
 $('#nfr').onclick=()=>{nfree=!nfree;mapRot(!nfree);$('#nfr').textContent=nfree?'◎':'🔓';toast(nfree?'Vue libre : touchez ◎ pour recentrer':'Vue guidage');if(!nfree)nfirst=1};
 document.addEventListener('visibilitychange',()=>{if(nr&&!document.hidden)try{navigator.wakeLock?.request('screen').then(w=>wl=w).catch(()=>{})}catch(e){}});
-const RP=[['👮','Police'],['💥','Accident'],['🚧','Travaux'],['⚠️','Danger'],['🚗','Bouchon'],['📸','Radar']];let RPS=[];try{RPS=JSON.parse(localStorage.getItem('talcomap-rep')||'[]').filter(r=>Date.now()-r.t<72e5)}catch(e){}
-const rl=L.layerGroup().addTo(map),drawRp=()=>{rl.clearLayers();RPS.forEach(r=>L.marker([r.lat,r.lon],{icon:L.divIcon({className:'',html:`<div class="em">${r.e}</div>`,iconSize:[26,26]})}).bindPopup(`${r.n} · il y a ${Math.round((Date.now()-r.t)/60000)} min`).addTo(rl))};drawRp();
-$('#nrep').innerHTML=RP.map((r,i)=>`<button data-i="${i}">${r[0]}<small>${r[1]}</small></button>`).join('');
+const RT=[['👮','Police','police',2],['🎫','Contrôleurs','controleur',2],['💥','Accident','accident',3],['⚠️','Danger','danger',6],['🚧','Travaux','travaux',12],['🚗','Bouchon','bouchon',1],['📸','Radar','radar',24]];
+let RPC=[],cfg={police:true},lastRep=0,warned={};const rl=L.layerGroup().addTo(map);
+const rt_=t=>RT.find(x=>x[2]===t),polT=t=>t==='police'||t==='controleur'||t==='radar';
+const repOK=r=>{const d=rt_(r.type);if(!d||!r.t)return false;if(Date.now()-r.t>d[3]*36e5)return false;if(cfg.police===false&&polT(r.type))return false;return Object.values(r.v||{}).filter(x=>x===-1).length<2};
+function drawRep(){rl.clearLayers();RPC.filter(repOK).forEach(r=>{const d=rt_(r.type),vs=Object.values(r.v||{}),up=vs.filter(x=>x===1).length,dn=vs.filter(x=>x===-1).length;
+L.marker([r.lat,r.lon],{icon:L.divIcon({className:'',html:`<div class="em">${d[0]}</div>`,iconSize:[26,26]})}).bindPopup(`<b>${d[1]}</b><br>par ${esc(r.pseudo||'?')} · il y a ${Math.max(1,Math.round((Date.now()-r.t)/60000))} min<br><button data-rv="${r.id}|1">👍 Toujours là (${up})</button><button data-rv="${r.id}|-1">👎 Plus là (${dn})</button>${typeof me!=='undefined'&&me&&(me.admin||me.uid===r.uid)?`<button data-rd="${r.id}">🗑 Supprimer</button>`:''}`).addTo(rl)})}
+map.on('popupopen',e=>{const el=e.popup.getElement();el&&(el.querySelectorAll('[data-rv]').forEach(b=>b.onclick=()=>{const[id,v]=b.dataset.rv.split('|');voteRep(id,+v);map.closePopup()}),el.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{delRep(b.dataset.rd);map.closePopup()}))});
+const rgrid=RT.map((r,i)=>`<button data-i="${i}">${r[0]}<small>${r[1]}</small></button>`).join('');$('#nrep').innerHTML=rgrid;$('#rpg').innerHTML=rgrid;
 $('#nsm').onclick=()=>{$('#nrep').hidden=!$('#nrep').hidden};
-$('#nrep').onclick=e=>{const b=e.target.closest('button');if(!b||!nll)return;const r=RP[b.dataset.i];RPS.push({lat:nll.lat,lon:nll.lng,e:r[0],n:r[1],t:Date.now()});try{localStorage.setItem('talcomap-rep',JSON.stringify(RPS))}catch(x){}drawRp();$('#nrep').hidden=true;toast(r[1]+' signalé (visible sur cet appareil)');say(r[1]+' signalé')};
+$('#nrep').onclick=e=>{const b=e.target.closest('button');if(!b||!nll)return;$('#nrep').hidden=true;sendReport(RT[b.dataset.i][2],nll)};
+$('#rpg').onclick=async e=>{const b=e.target.closest('button');if(!b)return;$('#rpm').hidden=true;const h=await here();sendReport(RT[b.dataset.i][2],h?{lat:h.lat,lng:h.lon}:map.getCenter())};
+$('#rpb').onclick=()=>{if(!me)return needLogin('Connectez-vous pour signaler');$('#rpm').hidden=false};$('#rpx').onclick=()=>$('#rpm').hidden=true;
+function warnRep(ll){RPC.filter(repOK).forEach(r=>{if(warned[r.id])return;const d=ll.distanceTo([r.lat,r.lon]);if(d<350){warned[r.id]=1;const t=rt_(r.type);say(`Attention, ${t[1].toLowerCase()} signalé dans ${sd(d)}`);toast(`${t[0]} ${t[1]} à ${fd(d)}`)}})}
+async function voteRep(id,v){if(!me)return needLogin('Connectez-vous pour confirmer');try{await FB.db.set(rf(`reports/${id}/v/${me.uid}`),v)}catch(e){toast('Action refusée')}}
+async function delRep(id){try{await FB.db.remove(rf('reports/'+id));toast('Signalement supprimé')}catch(e){toast('Suppression refusée')}}
 
 /* Panneau déplaçable, recentrage, entrées */
 const panel=$('#panel');
@@ -427,5 +459,50 @@ map.on('click',()=>{$('#qr').innerHTML='';document.activeElement?.blur?.()});
 const _sp=showPlace;showPlace=function(p,f){_sp(p,f);wiki(p)};
 async function wiki(p){const w=p.x&&p.x.wikipedia;if(!w||!/^[a-z-]+:/.test(w))return;const[l,...t]=w.split(':'),e=$('#place');try{const j=await(await fetch(`https://${encodeURIComponent(l)}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.join(':').replace(/ /g,'_'))}`)).json();if(!j.extract||cur!==p)return;e.insertAdjacentHTML('afterbegin',(j.thumbnail?`<img src="${esc(j.thumbnail.source)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:14px;margin-bottom:10px">`:'')+'')
 ;e.querySelector('h3').insertAdjacentHTML('afterend',`<p style="margin:6px 0">${esc(j.extract.length>240?j.extract.slice(0,237)+'…':j.extract)} <a href="${esc(j.content_urls?.desktop?.page||'#')}" target="_blank" rel="noopener">Wikipédia</a></p>`)}catch(err){}}
+
+/* Firebase : comptes, synchronisation, signalements partagés */
+const FBC={apiKey:"AIzaSyDjGRuEWDzbxuzFEdcdG465TRdV5KXRcAA",authDomain:"itn-5-fd577.firebaseapp.com",databaseURL:"https://itn-5-fd577-default-rtdb.europe-west1.firebasedatabase.app",projectId:"itn-5-fd577",storageBucket:"itn-5-fd577.firebasestorage.app",messagingSenderId:"644450805208",appId:"1:644450805208:web:0451fbbe95848ec2417ead",measurementId:"G-PJBNGP9VG1"};
+const ADM=['anton@talcomap.app','talco@talcomap.app'],PS=/^[a-zA-Z0-9_.-]{3,20}$/,pe=p=>p.toLowerCase()+'@talcomap.app';
+let FB=null,fbBusy=0,me=null,cpT=0;S.trips=Array.isArray(S.trips)?S.trips:[];
+const rf=p=>FB.db.ref(FB.rdb,p),arr=x=>x?Object.values(x):[];
+async function fbStart(){if(FB||fbBusy)return;fbBusy=1;try{const B='https://www.gstatic.com/firebasejs/10.14.1/',[a,au,db]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-database.js')]),app=a.initializeApp(FBC);
+FB={a,au,db,app,auth:au.getAuth(app),rdb:db.getDatabase(app)};au.onAuthStateChanged(FB.auth,onUser);
+db.onValue(db.query(rf('reports'),db.orderByChild('t'),db.startAt(Date.now()-864e5)),sn=>{RPC=[];sn.forEach(c=>{const v=c.val();v&&v.type&&v.lat&&RPC.push({id:c.key,...v})});drawRep()},()=>{});
+db.onValue(rf('config/policeAlerts'),sn=>{cfg.police=sn.val()!==false;drawRep()},()=>{});anOn()}catch(e){toast('Comptes et signalements indisponibles (réseau)')}fbBusy=0}
+async function anOn(){let c={};try{c=JSON.parse(localStorage.getItem('talcomap-consent')||'{}')}catch(e){}if(!FB)return;try{if(c.an){if(!FB.an){FB.an=await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js');FB.ai=FB.an.getAnalytics(FB.app)}FB.an.setAnalyticsCollectionEnabled(FB.ai,true)}else if(FB.an)FB.an.setAnalyticsCollectionEnabled(FB.ai,false)}catch(e){}}
+async function onUser(u){if(!u){me=null;uiAcc();return}try{const b=await FB.db.get(rf('banned/'+u.uid));if(b.exists()){await FB.au.signOut(FB.auth);toast('Ce compte a été suspendu par un administrateur.');me=null;uiAcc();return}}catch(e){}
+me={uid:u.uid,pseudo:u.displayName||u.email.split('@')[0],admin:ADM.includes((u.email||'').toLowerCase())};uiAcc();await loadCloud();cleanOld();drawRep()}
+function uiAcc(){const b=$('#acb');b.classList.toggle('on',!!me);b.textContent=me?me.pseudo[0].toUpperCase():'👤';if(!$('#accm').hidden)renderAcc()}
+const needLogin=m=>{toast(m);openAcc()};
+async function loadCloud(){try{const sn=await FB.db.get(rf('saved/'+me.uid));if(sn.exists()){const c=sn.val(),f=arr(c.fav),t=arr(c.trips);S.home=c.home||S.home;S.work=c.work||S.work;S.fav=[...f,...S.fav.filter(x=>!f.some(y=>y.lat===x.lat&&y.lon===x.lon))];S.trips=[...t,...S.trips.filter(x=>!t.some(y=>y.t===x.t))].slice(0,30)}
+try{localStorage.setItem('talcomap',JSON.stringify(S))}catch(e){}cloudPush();renderSaved();hw()}catch(e){}}
+function cloudPush(){clearTimeout(cpT);cpT=setTimeout(()=>{if(!me||!FB)return;FB.db.set(rf('saved/'+me.uid),JSON.parse(JSON.stringify({home:S.home||null,work:S.work||null,fav:S.fav,trips:S.trips,u:Date.now()}))).catch(()=>{})},800)}
+async function cleanOld(){try{const old=Date.now()-864e5,q=me.admin?FB.db.query(rf('reports'),FB.db.orderByChild('t'),FB.db.endAt(old)):FB.db.query(rf('reports'),FB.db.orderByChild('uid'),FB.db.equalTo(me.uid)),sn=await FB.db.get(q);sn.forEach(c=>{if((c.val().t||0)<old)FB.db.remove(rf('reports/'+c.key)).catch(()=>{})})}catch(e){}}
+async function purge(uid){const sn=await FB.db.get(FB.db.query(rf('reports'),FB.db.orderByChild('uid'),FB.db.equalTo(uid))),j=[FB.db.remove(rf('saved/'+uid))];sn.forEach(c=>{j.push(FB.db.remove(rf('reports/'+c.key)))});await Promise.all(j)}
+async function sendReport(type,ll){if(!me)return needLogin('Connectez-vous pour signaler');if(!FB)return;if(cfg.police===false&&polT(type))return toast('Les alertes police et contrôleurs sont désactivées pour le moment.');if(Date.now()-lastRep<30000)return toast('Patientez quelques secondes entre deux signalements.');lastRep=Date.now();const d=rt_(type);
+try{await FB.db.push(rf('reports'),{uid:me.uid,pseudo:me.pseudo,type,lat:+ll.lat.toFixed(5),lon:+ll.lng.toFixed(5),t:FB.db.serverTimestamp()});toast(d[0]+' '+d[1]+' signalé');say(d[1]+' signalé')}catch(e){lastRep=0;toast('Signalement refusé (compte suspendu ou réseau).')}}
+const aerr=c=>({'auth/email-already-in-use':'Ce pseudo est déjà pris.','auth/invalid-credential':'Pseudo ou mot de passe incorrect.','auth/wrong-password':'Pseudo ou mot de passe incorrect.','auth/user-not-found':'Pseudo ou mot de passe incorrect.','auth/weak-password':'Mot de passe trop court (6 caractères minimum).','auth/network-request-failed':'Réseau indisponible.','auth/operation-not-allowed':"La connexion par mot de passe n'est pas activée dans Firebase.",'auth/too-many-requests':'Trop de tentatives, réessayez plus tard.','auth/requires-recent-login':'Reconnectez-vous puis réessayez.'}[c]||'Erreur : '+c);
+function openAcc(){$('#accm').hidden=false;renderAcc();FB||fbStart()}const closeAcc=()=>$('#accm').hidden=true;
+function renderAcc(){const b=$('#acbody');if(!me){$('#act').textContent='Compte';b.innerHTML='<p class="mut">Connectez-vous pour enregistrer vos lieux, domicile, travail et trajets, et pour signaler des contrôles. Le reste du site reste libre d\'accès.</p><label>Pseudo<input id="au" autocomplete="username" autocapitalize="none" maxlength="20"></label><label>Mot de passe<input id="ap" type="password" autocomplete="current-password"></label><p class="mut" id="aerr" style="color:#d93025"></p><div class="row"><button class="pri" id="ali">Se connecter</button><button id="acr">Créer un compte</button></div><p class="mut" style="margin-top:10px">En créant un compte, vous confirmez avoir 15 ans ou plus et accepter les conditions (Réglages → Mentions légales &amp; cookies).</p>';return}
+$('#act').textContent='Mon compte';b.innerHTML=`<p>Connecté : <b>${esc(me.pseudo)}</b>${me.admin?' · 🛡 administrateur':''}</p><p class="mut">Vos favoris, domicile, travail et trajets sont synchronisés.</p><div class="row"><button id="aout">Se déconnecter</button><button id="aexp">Exporter mes données</button><button id="adel" style="color:#d93025">Supprimer mon compte</button></div>`+(me.admin?`<h3>🛡 Administration</h3><label class="ck"><input type="checkbox" id="ad-pol" ${cfg.police!==false?'checked':''}> Alertes police, contrôleurs et radars actives</label><div id="adl"><div class="load"></div></div>`:'');me.admin&&adminList()}
+async function doAuth(create){const u=$('#au').value.trim(),p=$('#ap').value,e=$('#aerr');e.textContent='';if(!FB){await fbStart();if(!FB){e.textContent='Service indisponible.';return}}
+if(!PS.test(u)){e.textContent='Pseudo : 3 à 20 caractères (lettres, chiffres, . _ -).';return}if(p.length<6){e.textContent='Mot de passe : 6 caractères minimum.';return}
+$('#ali').disabled=$('#acr').disabled=true;try{if(create){const c=await FB.au.createUserWithEmailAndPassword(FB.auth,pe(u),p);await FB.au.updateProfile(c.user,{displayName:u});await FB.db.set(rf('users/'+c.user.uid),{pseudo:u,createdAt:FB.db.serverTimestamp()});me&&(me.pseudo=u)}else await FB.au.signInWithEmailAndPassword(FB.auth,pe(u),p);toast(create?'Compte créé ✅':'Connecté ✅');closeAcc()}catch(x){const m=$('#aerr');m&&(m.textContent=aerr(x.code||x.message));const l=$('#ali');l&&(l.disabled=$('#acr').disabled=false)}}
+async function adminList(){const el=$('#adl');try{const[u,b]=await Promise.all([FB.db.get(rf('users')),FB.db.get(rf('banned'))]),bn=b.val()||{},us=u.val()||{};
+el.innerHTML=Object.entries(us).map(([id,x])=>{const adm=ADM.includes((x.pseudo||'').toLowerCase()+'@talcomap.app');return`<div class="step" style="cursor:default"><span><b>${esc(x.pseudo)}</b>${bn[id]?' · 🚫 suspendu':''}</span>${adm?'<small class="mut">admin</small>':`<button data-ab="${id}">${bn[id]?'Rétablir':'Bannir'}</button><button data-ad="${id}" style="color:#d93025">Supprimer</button>`}</div>`}).join('')||'<p class="mut">Aucun utilisateur.</p>'}catch(e){el.innerHTML='<p class="mut">Accès refusé ou réseau indisponible.</p>'}}
+$('#acbody').addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
+if(t.id==='ali')return doAuth(0);if(t.id==='acr')return doAuth(1);
+if(t.id==='aout'){await FB.au.signOut(FB.auth);toast('Déconnecté');return closeAcc()}
+if(t.id==='aexp'){const d={pseudo:me.pseudo,favoris:S.fav,domicile:S.home||null,travail:S.work||null,trajets:S.trips,exporte_le:new Date().toISOString()},a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download='mes-donnees-talcomap.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5e3);return}
+if(t.id==='adel'){if(!confirm('Supprimer définitivement votre compte et toutes vos données ?'))return;const pw=prompt('Confirmez votre mot de passe');if(!pw)return;try{const u=FB.auth.currentUser;await FB.au.reauthenticateWithCredential(u,FB.au.EmailAuthProvider.credential(u.email,pw));await purge(u.uid);await FB.db.remove(rf('users/'+u.uid));await FB.au.deleteUser(u);S.fav=[];S.trips=[];S.home=S.work=null;save();renderSaved();hw();toast('Compte supprimé');closeAcc()}catch(x){toast(aerr(x.code||x.message))}return}
+if(t.dataset.ab){const id=t.dataset.ab,sn=await FB.db.get(rf('banned/'+id));try{sn.exists()?await FB.db.remove(rf('banned/'+id)):await FB.db.set(rf('banned/'+id),true)}catch(x){toast('Refusé')}return adminList()}
+if(t.dataset.ad){if(!confirm('Supprimer les données et signalements de cet utilisateur et le suspendre ?'))return;try{const id=t.dataset.ad;await purge(id);await FB.db.set(rf('banned/'+id),true);await FB.db.update(rf('users/'+id),{deleted:true});toast('Utilisateur supprimé et suspendu')}catch(x){toast('Refusé')}adminList()}});
+$('#acbody').addEventListener('change',e=>{if(e.target.id==='ad-pol')FB.db.set(rf('config/policeAlerts'),e.target.checked).catch(()=>toast('Refusé'))});
+$('#acbody').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='ap'){e.preventDefault();doAuth(0)}});
+$('#acb').onclick=openAcc;$('#s-acc').onclick=openAcc;$('#acx').onclick=closeAcc;
+function saveTrip(m,r){S.trips.unshift({a:{lat:rt.a.lat,lon:rt.a.lon,name:rt.a.name},b:{lat:rt.b.lat,lon:rt.b.lon,name:rt.b.name},m,d:r.duration,k:r.distance,t:Date.now()});S.trips=S.trips.slice(0,30);save();renderTrips();toast('Trajet enregistré'+(me?'':' sur cet appareil (connectez-vous pour le synchroniser)'))}
+function renderTrips(){const e=$('#trips');e.innerHTML='<h3>🧭 Trajets</h3>'+(S.trips.length?S.trips.map((t,i)=>`<div class="fld"><button class="trp" data-tr="${i}" style="flex:1;text-align:left;border-radius:16px;color:var(--ink)"><b>${M[t.m][0]} ${esc(t.a.name)} → ${esc(t.b.name)}</b><br><small class="mut">${fdur(t.d)} · ${fd(t.k)}</small></button><button data-td="${i}" aria-label="Supprimer">✕</button></div>`).join(''):'<p class="mut">Touchez 💾 sur un trajet pour l\'enregistrer.</p>')}
+$('#t-saved').addEventListener('click',e=>{const x=e.target.closest('[data-tr]'),y=e.target.closest('[data-td]');if(x){const t=S.trips[x.dataset.tr];if(!t)return;mode=t.m;rt.a=t.a;rt.b=t.b;$('#ra').value=t.a.name;$('#rb').value=t.b.name;tab('route');calc()}if(y){S.trips.splice(+y.dataset.td,1);save();renderTrips()}});
+const _rs=renderSaved;renderSaved=function(){_rs();renderTrips()};renderSaved();
 </script>
 </body></html>
