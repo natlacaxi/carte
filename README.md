@@ -12,7 +12,7 @@ Déposez ces fichiers à la racine d'un dépôt GitHub Pages (ou tout hébergeme
 
 ## À compléter
 - Mentions légales dans `index.html` (éditeur, immatriculation, e-mail, hébergeur) et l'adresse de contact dans Réglages. Transitous demande un contact visible.
-- Après une modification, changez le numéro de version dans `sw.js` (`talcomap-v5`) pour forcer la mise à jour du cache.
+- Après une modification, changez le numéro de version dans `sw.js` (`talcomap-v6`) pour forcer la mise à jour du cache.
 
 ## Services utilisés
 Tuiles OpenStreetMap et autres fonds · OSRM (routing.openstreetmap.de) · Transitous · Nominatim · Overpass · Open-Meteo · OpenSky · Wikipédia. Usage gratuit et raisonnable uniquement.
